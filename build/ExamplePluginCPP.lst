@@ -1,0 +1,653 @@
+         w __syscall_tls_create
+         w __syscall_tls_delete
+         w __syscall_tls_get
+         w __syscall_tls_set
+02000000 T __init
+02000024 000000a4 W abort
+020000d8 00000034 W __gnu_cxx::__throw_concurrence_lock_error()
+0200010c 00000034 W __gnu_cxx::__throw_concurrence_unlock_error()
+02000140 00000024 T std::terminate()
+02000164 00000024 T std::unexpected()
+02000188 00000058 T std::__throw_logic_error(char const*)
+020001e0 00000058 T std::__throw_length_error(char const*)
+02000238 00000058 T __cxa_call_terminate
+02000290 00000014 t _GLOBAL__sub_D__ZN9__gnu_cxx9__freeresEv
+020002a4 00000040 t _GLOBAL__sub_D__ZN17__eh_globals_init7_S_initE
+020002e4 00000258 t _GLOBAL__sub_I__ZN9__gnu_cxx9__freeresEv
+0200053c 00000040 t _GLOBAL__sub_I__ZN17__eh_globals_init7_S_initE
+0200057c t __do_global_dtors_aux
+02000648 t frame_dummy
+0200066c 00000004 T on_init_wut_stdcpp()
+02000670 00000004 T on_init_wut_malloc()
+02000674 00000004 T on_fini_wut_malloc()
+02000678 00000014 T on_init_wut_sockets()
+0200068c 00000014 T on_fini_wut_sockets()
+020006a0 00000004 T on_init_wut_newlib()
+020006a4 00000004 T on_fini_wut_newlib()
+020006a8 00000004 T on_init_wut_thread()
+020006ac 00000040 T __init_wrapper()
+020006fc 00000004 T __fini_wrapper()
+02000700 00000038 T wups_init_config_functions(wups_loader_init_config_args_t)
+02000738 00000034 T wups_init_button_combo_functions(wups_loader_init_button_combo_args_t_)
+0200076c 00000040 T wups_init_reent_functions(wups_loader_init_reent_args_t_)
+020007ac 00000004 T on_init_wut_devoptab()
+020007b0 00000004 T on_fini_wut_devoptab()
+020007b4 00000034 T init_storage(wups_loader_init_storage_args_t_)
+020007e8 00000018 T multipleValueItemChanged(ConfigItemMultipleValues*, unsigned int)
+02000800 00000018 T boolItemChanged(ConfigItemBoolean*, bool)
+02000818 00000010 W WUPSConfigItemBoolean::~WUPSConfigItemBoolean()
+02000818 00000010 W WUPSConfigItemBoolean::~WUPSConfigItemBoolean()
+02000828 00000040 W WUPSConfigItemBoolean::~WUPSConfigItemBoolean()
+02000868 00000010 W WUPSConfigItemMultipleValues::~WUPSConfigItemMultipleValues()
+02000868 00000010 W WUPSConfigItemMultipleValues::~WUPSConfigItemMultipleValues()
+02000878 00000040 W WUPSConfigItemMultipleValues::~WUPSConfigItemMultipleValues()
+020008b8 00000024 T deinit_plugin()
+020008dc 0000001c T on_app_ending()
+02000908 00000004 T on_fini_wut_stdcpp()
+0200090c 00000004 T on_app_requests_exit()
+02000910 000000b0 t Apply11PatchesInRAM(bool) [clone .isra.0]
+020009f0 00000070 T on_app_starting()
+02000a80 000001e0 T ConfigMenuClosedCallback()
+02000cb0 00000118 T WatchdogThreadFunc(int, char const**)
+02000df8 00000160 T init_plugin()
+02000f58 00000400 T ConfigMenuOpenedCallback(WUPSConfigCategoryHandle)
+02001358 00000040 T WUPSConfigCategory::~WUPSConfigCategory()
+02001358 00000040 T WUPSConfigCategory::~WUPSConfigCategory()
+02001398 00000058 T WUPSConfigCategory::~WUPSConfigCategory()
+020013f0 00000018 T WUPSConfigCategory::WUPSConfigCategory(WUPSConfigCategoryHandle)
+020013f0 00000018 T WUPSConfigCategory::WUPSConfigCategory(WUPSConfigCategoryHandle)
+02001408 000000d0 T WUPSConfigCategory::add(WUPSConfigItem&&)
+020014d8 00000040 T WUPSConfigItem::~WUPSConfigItem()
+020014d8 00000040 T WUPSConfigItem::~WUPSConfigItem()
+02001518 00000058 T WUPSConfigItem::~WUPSConfigItem()
+02001570 00000024 T WUPSConfigItem::WUPSConfigItem(WUPSConfigItem&&)
+02001570 00000024 T WUPSConfigItem::WUPSConfigItem(WUPSConfigItem&&)
+02001594 00000008 T WUPSConfigItem::getHandle() const
+0200159c 0000000c T WUPSConfigItem::release()
+020015a8 00000114 W std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string<std::allocator<char> >(char const*, std::allocator<char> const&)
+020015a8 00000114 W std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string<std::allocator<char> >(char const*, std::allocator<char> const&)
+020016bc 000001ec T WUPSConfigItemBoolean::Create(std::optional<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::basic_string_view<char, std::char_traits<char> >, bool, bool, void (*)(ConfigItemBoolean*, bool), WUPSConfigAPIStatus&)
+020018a8 00000268 T WUPSConfigItemBoolean::Create(std::optional<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::basic_string_view<char, std::char_traits<char> >, bool, bool, void (*)(ConfigItemBoolean*, bool))
+02001b10 0000025c T WUPSConfigItemMultipleValues::CreateFromIndex(std::optional<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const>, std::basic_string_view<char, std::char_traits<char> >, int, int, std::span<WUPSConfigItemMultipleValues::ValuePair const, 4294967295u> const&, void (*)(ConfigItemMultipleValues*, unsigned int), WUPSConfigAPIStatus&)
+02001d6c 0000021c T WUPSConfigItemMultipleValues::CreateFromValue(std::optional<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const>, std::basic_string_view<char, std::char_traits<char> >, unsigned int, unsigned int, std::span<WUPSConfigItemMultipleValues::ValuePair const, 4294967295u> const&, void (*)(ConfigItemMultipleValues*, unsigned int), WUPSConfigAPIStatus&)
+02001f88 0000029c T WUPSConfigItemMultipleValues::CreateFromValue(std::optional<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const>, std::basic_string_view<char, std::char_traits<char> >, int, int, std::span<WUPSConfigItemMultipleValues::ValuePair const, 4294967295u> const&, void (*)(ConfigItemMultipleValues*, unsigned int))
+02002224 000000c4 T WUPSButtonComboAPI_InitInternal
+020022e8 000000ec T WUPSConfigAPI_GetStatusStr
+020023d4 000000b4 T WUPSConfigAPI_GetVersion
+020024a8 00000250 T WUPSConfigAPI_InitLibrary_Internal
+02002718 000000ac T WUPSConfigAPI_Init
+020027c4 00000078 T WUPSConfigAPI_Category_Destroy
+0200283c 0000008c T WUPSConfigAPI_Category_AddItem
+020028c8 0000009c T WUPSConfigAPI_Item_CreateEx
+02002964 00000078 T WUPSConfigAPI_Item_Destroy
+020029dc 0000000c T __wups_start
+020029f8 00000060 W __init_wut_socket
+02002a68 0000005c W __fini_wut_socket
+02002ac4 00000004 T __getreent
+02002ac8 0000005c W wut_get_thread_specific
+02002b44 00000134 W __assert_func
+02002c88 000000a4 T WUPSStorageAPI_InitInternal
+02002d2c 00000034 T WUPSStorageAPI_SaveStorage
+02002d60 00000048 T WUPSStorageAPI_StoreItem
+02002da8 0000005c T WUPSStorageAPI_GetItem
+02002e04 00000004 T WUPSStorageAPI::SaveStorage(bool)
+02002e08 0000004c t reclaim_reent_trampoline(void*)
+02002e54 00000034 T WUPSReentAPI_InitInternal
+02002e98 000001a8 T __wups_getreent()
+02003060 00000024 t WUPSConfigItemBoolean_onCloseCallback(void*)
+02003084 0000000c t WUPSConfigItemBoolean_restoreDefault(void*)
+02003090 00000074 t WUPSConfigItemBoolean_getCurrentValueSelectedDisplay(void*, char*, int)
+02003104 00000074 t WUPSConfigItemBoolean_getCurrentValueDisplay(void*, char*, int)
+02003178 00000068 t WUPSConfigItemBoolean_onInput(void*, WUPSConfigSimplePadData)
+020031e0 00000044 t WUPSConfigItemBoolean_onDelete(void*)
+02003224 000001a0 T WUPSConfigItemBoolean_CreateEx
+020033c4 0000004c t WUPSConfigItemMultipleValues_onCloseCallback(void*)
+02003410 0000005c t WUPSConfigItemMultipleValues_onInput(void*, WUPSConfigSimplePadData)
+0200346c 0000000c t WUPSConfigItemMultipleValues_restoreDefault(void*)
+02003478 000000f4 t WUPSConfigItemMultipleValues_getCurrentValueSelectedDisplay(void*, char*, int)
+0200356c 00000070 t WUPSConfigItemMultipleValues_getCurrentValueDisplay(void*, char*, int)
+020035dc 00000088 t WUPSConfigItemMultipleValues_onDelete(void*)
+02003664 000002a4 T WUPSConfigItemMultipleValues_Create
+02003908 00000014 T __init_wut_newlib
+0200391c 00000004 T __fini_wut_newlib
+02003920 00000078 T __fini_wut_sbrk_heap
+020039a8 0000002c t __wut_cond_alarmcb
+020039f4 00000030 T __init_wut_thread
+02003a34 000000ac T __syscall_lock_acquire
+02003b20 000000ac T __syscall_lock_release
+02003c0c 000000ac T __syscall_lock_acquire_recursive
+02003cf8 000000ac T __syscall_lock_release_recursive
+02003de4 000000c4 T __syscall_cond_broadcast
+02003ee8 000002cc T __syscall_cond_wait
+02004254 00000004 T __init_wut_malloc
+02004258 00000004 T __fini_wut_malloc
+0200425c 0000006c T _malloc_r
+020042c8 00000018 T _free_r
+020042e0 000000e0 T _realloc_r
+020043d0 0000009c T _calloc_r
+0200446c 00000070 T _memalign_r
+020044dc 0000006c T WHBAddLogHandler
+02004548 00000060 T WHBRemoveLogHandler
+020045a8 000001c0 T WHBLogPrintf
+02004768 0000004c t udpLogHandler
+020047b4 000000cc T WHBLogUdpInit
+020048a0 0000004c T WHBLogUdpDeinit
+020048ec 000001bc T __init_wut_devoptab
+02004af8 0000008c T __fini_wut_devoptab
+02004ba4 000000a0 T __wut_fsa_dirclose
+02004c74 000001ac T __wut_fsa_dirnext
+02004e50 0000017c T __wut_fsa_diropen
+0200500c 000000a0 T __wut_fsa_dirreset
+020050dc 000000d4 T __wut_fsa_fstat
+020051e0 0000009c T __wut_fsa_fsync
+020052ac 000000e0 T __wut_fsa_mkdir
+0200539c 000004cc T __wut_fsa_open
+020058d8 000001bc T __wut_fsa_read
+02005ac4 00000114 T __wut_fsa_rename
+02005be8 000000c4 T __wut_fsa_rmdir
+02005cbc 00000188 T __wut_fsa_seek
+02005e84 00000118 T __wut_fsa_stat
+02005fac 00000168 T __wut_fsa_statvfs
+02006124 000000c8 T __wut_fsa_ftruncate
+0200622c 000000c4 T __wut_fsa_unlink
+02006300 00000040 T __wut_fsa_hashstring
+02006340 00000368 T __wut_fsa_fixpath
+020066a8 0000007c T __wut_fsa_translate_stat_mode
+02006724 00000144 T __wut_fsa_translate_stat
+02006868 00000028 T __wut_fsa_translate_error
+02006890 000001d4 T __wut_fsa_write
+02006a94 000000a8 T sendto
+02006b4c 00000094 T setsockopt
+02006bf0 00000058 T shutdown
+02006c58 000000d0 T socket
+02006d38 0000000c T __wut_socket_init_devoptab
+02006d44 0000000c T __wut_socket_fini_devoptab
+02006d50 0000008c T __wut_get_nsysnet_fd
+02006ddc 00000080 T __wut_get_nsysnet_result
+02006e6c 00000010 T __wut_socket_open
+02006e7c 00000048 T __wut_socket_read
+02006ed4 00000048 T __wut_socket_write
+02006f2c 0000011c T __wut_fsa_chdir
+02007058 000000e0 T __wut_fsa_chmod
+02007148 0000009c T __wut_fsa_close
+02007214 0000003c T __wut_socket_close
+02007260 00000018 T __cxxabiv1::__class_type_info::__do_find_public_src(int, void const*, __cxxabiv1::__class_type_info const*, void const*) const
+02007278 00000010 T __cxxabiv1::__class_type_info::~__class_type_info()
+02007278 00000010 T __cxxabiv1::__class_type_info::~__class_type_info()
+02007288 00000040 T __cxxabiv1::__class_type_info::~__class_type_info()
+020072c8 00000098 T __cxxabiv1::__class_type_info::__do_upcast(__cxxabiv1::__class_type_info const*, void const*, __cxxabiv1::__class_type_info::__upcast_result&) const
+02007360 00000134 T __cxxabiv1::__class_type_info::__do_dyncast(int, __cxxabiv1::__class_type_info::__sub_kind, __cxxabiv1::__class_type_info const*, void const*, __cxxabiv1::__class_type_info const*, void const*, __cxxabiv1::__class_type_info::__dyncast_result&) const
+02007494 000000f8 T __cxxabiv1::__class_type_info::__do_upcast(__cxxabiv1::__class_type_info const*, void**) const
+0200758c 00000134 T __cxxabiv1::__class_type_info::__do_catch(std::type_info const*, void**, unsigned int) const
+020076c0 00000004 T operator delete(void*, unsigned int)
+020076c4 0000000c W __gnu_cxx::__concurrence_lock_error::what() const
+020076d0 0000000c W __gnu_cxx::__concurrence_unlock_error::what() const
+020076dc 00000010 W __gnu_cxx::__concurrence_lock_error::~__concurrence_lock_error()
+020076dc 00000010 W __gnu_cxx::__concurrence_lock_error::~__concurrence_lock_error()
+020076ec 00000040 W __gnu_cxx::__concurrence_lock_error::~__concurrence_lock_error()
+0200772c 00000010 W __gnu_cxx::__concurrence_unlock_error::~__concurrence_unlock_error()
+0200772c 00000010 W __gnu_cxx::__concurrence_unlock_error::~__concurrence_unlock_error()
+0200773c 00000040 W __gnu_cxx::__concurrence_unlock_error::~__concurrence_unlock_error()
+0200777c 0000012c t (anonymous namespace)::pool::free(void*) [clone .constprop.0]
+020078a8 000000f4 t (anonymous namespace)::pool::allocate(unsigned int) [clone .constprop.0]
+0200799c 00000068 T __cxa_allocate_exception
+02007a04 00000030 T __cxa_free_exception
+02007a34 000000c8 T __cxa_begin_catch
+02007afc 000000c0 T __cxa_end_catch
+02007bbc 00000004 T std::exception::~exception()
+02007bbc 00000004 T std::exception::~exception()
+02007bc0 00000068 t eh_globals_dtor(void*)
+02007c28 00000044 T __cxa_get_globals_fast
+02007c6c 00000090 T __cxa_get_globals
+02007cfc 00000098 t get_adjusted_ptr(std::type_info const*, std::type_info const*, void**)
+02007d94 0000013c t read_encoded_value_with_base(unsigned char, unsigned int, unsigned char const*, unsigned int*)
+02007ed0 00000060 t base_of_encoded_value(unsigned char, _Unwind_Context*)
+02007f30 00000120 t parse_lsda_header(_Unwind_Context*, unsigned char const*, lsda_header_info*)
+02008050 00000138 t check_exception_spec(lsda_header_info*, std::type_info const*, void*, long)
+02008188 000008f0 T __gxx_personality_v0
+02008a78 00000020 T __cxxabiv1::__terminate(void (*)())
+02008a98 00000018 T __cxxabiv1::__unexpected(void (*)())
+02008ab0 00000018 T std::get_terminate()
+02008ac8 00000018 T std::get_unexpected()
+02008ae0 00000080 t __gxx_exception_cleanup(_Unwind_Reason_Code, _Unwind_Exception*)
+02008b60 00000098 T __cxa_throw
+02008bf8 00000080 T operator new(unsigned int)
+02008c78 00000010 T __cxxabiv1::__si_class_type_info::~__si_class_type_info()
+02008c78 00000010 T __cxxabiv1::__si_class_type_info::~__si_class_type_info()
+02008c88 00000040 T __cxxabiv1::__si_class_type_info::~__si_class_type_info()
+02008cc8 0000021c T __cxxabiv1::__si_class_type_info::__do_dyncast(int, __cxxabiv1::__class_type_info::__sub_kind, __cxxabiv1::__class_type_info const*, void const*, __cxxabiv1::__class_type_info const*, void const*, __cxxabiv1::__class_type_info::__dyncast_result&) const
+02008ee4 00000140 T __cxxabiv1::__si_class_type_info::__do_find_public_src(int, void const*, __cxxabiv1::__class_type_info const*, void const*) const
+02009024 00000094 T __cxxabiv1::__si_class_type_info::__do_upcast(__cxxabiv1::__class_type_info const*, void const*, __cxxabiv1::__class_type_info::__upcast_result&) const
+020090b8 00000004 T std::type_info::~type_info()
+020090b8 00000004 T std::type_info::~type_info()
+020090bc 00000008 T std::type_info::__is_pointer_p() const
+020090bc 00000008 T std::type_info::__is_function_p() const
+020090c4 00000008 T std::logic_error::what() const
+020090c4 00000008 T std::runtime_error::what() const
+020090cc 00000084 T std::logic_error::~logic_error()
+020090cc 00000084 T std::logic_error::~logic_error()
+02009150 00000084 T std::runtime_error::~runtime_error()
+02009150 00000084 T std::runtime_error::~runtime_error()
+020091d4 00000088 T std::runtime_error::~runtime_error()
+0200925c 00000084 T std::length_error::~length_error()
+0200925c 00000084 T std::length_error::~length_error()
+020092e0 00000088 T std::logic_error::~logic_error()
+02009368 00000088 T std::length_error::~length_error()
+020093f0 00000114 T std::logic_error::logic_error(char const*)
+020093f0 00000114 T std::logic_error::logic_error(char const*)
+02009504 00000038 T std::length_error::length_error(char const*)
+02009504 00000038 T std::length_error::length_error(char const*)
+0200953c 00000114 T std::runtime_error::runtime_error(char const*)
+0200953c 00000114 T std::runtime_error::runtime_error(char const*)
+02009650 000000f4 T std::__cow_string::__cow_string(char const*, unsigned int)
+02009650 000000f4 T std::__cow_string::__cow_string(char const*, unsigned int)
+02009744 000000dc W std::string::_Rep::_S_create(unsigned int, unsigned int, std::allocator<char> const&)
+02009820 00000004 W std::string::_Rep::_M_destroy(std::allocator<char> const&)
+02009824 0000005c T std::runtime_error::runtime_error(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)
+02009824 0000005c T std::runtime_error::runtime_error(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)
+02009880 00000068 W std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_create(unsigned int&, unsigned int)
+020098e8 00000018 W std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_dispose()
+02009900 00000160 W std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_mutate(unsigned int, unsigned int, char const*, unsigned int)
+02009a60 00000100 W std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_append(char const*, unsigned int)
+02009b60 00000034 W std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::append(char const*, unsigned int)
+02009b94 00000064 W std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::append(char const*)
+02009bf8 0000000c T std::bad_alloc::what() const
+02009c04 00000010 T std::bad_alloc::~bad_alloc()
+02009c04 00000010 T std::bad_alloc::~bad_alloc()
+02009c14 00000040 T std::bad_alloc::~bad_alloc()
+02009c54 00000004 T operator delete(void*)
+02009c58 00000018 T std::get_new_handler()
+02009c70 00000448 T __divdi3
+0200a0b8 000003c4 T __udivdi3
+0200a47c 000001d0 t init_dwarf_reg_size_table
+0200a64c 000001b8 t uw_install_context_1
+0200a804 00000184 t read_encoded_value
+0200a988 00000898 t execute_stack_op
+0200b220 0000037c t uw_update_context_1
+0200b59c 00000910 t execute_cfa_program_specialized
+0200beac 00000974 t execute_cfa_program_generic
+0200c820 000004ec t uw_frame_state_for
+0200cd0c 000002d0 t uw_init_context_1
+0200cfdc 000001cc t _Unwind_RaiseException_Phase2
+0200d1a8 000001f0 t _Unwind_ForcedUnwind_Phase2
+0200d398 00000064 T _Unwind_SetGR
+0200d3fc 00000014 T _Unwind_GetIPInfo
+0200d410 00000008 T _Unwind_SetIP
+0200d418 00000008 T _Unwind_GetLanguageSpecificData
+0200d420 00000008 T _Unwind_GetRegionStart
+0200d428 00000008 T _Unwind_GetDataRelBase
+0200d430 00000008 T _Unwind_GetTextRelBase
+0200d438 00000004 t _Unwind_DebugHook
+0200d43c 0000038c T _Unwind_RaiseException
+0200d7c8 000001dc T _Unwind_Resume
+0200d9a4 0000001c T _Unwind_DeleteException
+0200d9c0 00000020 t fde_unencoded_compare
+0200d9e0 00000074 t fde_unencoded_extract
+0200da54 00000110 t frame_downheap
+0200db64 0000013c t read_encoded_value_with_base
+0200dca0 000002a0 t fde_radixsort
+0200df40 0000014c t __deregister_frame_info_bases.part.0
+0200e08c 0000015c t get_cie_encoding
+0200e1e8 000000fc t fde_mixed_encoding_extract
+0200e2e4 0000020c t classify_object_over_fdes.constprop.0
+0200e4f0 00000104 t fde_single_encoding_extract
+0200e5f4 000000cc t fde_single_encoding_compare
+0200e6c0 00000144 t fde_mixed_encoding_compare
+0200e804 000002ac t add_fdes.isra.0
+0200eab0 00000350 t linear_search_fdes
+0200ee00 000006ac t search_object
+0200f4ac 00000088 T __register_frame_info
+0200f534 00000020 T __deregister_frame_info
+0200f554 00000248 T _Unwind_Find_FDE
+0200f79c 000001b8 T chdir
+0200f954 0000027c T _concatenate_path
+0200fbd0 000000b4 T __release_handle
+0200fc84 0000010c T __alloc_handle
+0200fd90 00000060 T __get_handle
+0200fdf0 00000168 T _close_r
+0200ff58 00000008 t null_write
+0200ff60 00000018 T setDefaultDevice
+0200ff78 00000108 T FindDevice
+02010080 00000040 T RemoveDevice
+020100c0 000000f4 T AddDevice
+020101b4 00000080 T pthread_mutex_lock
+02010234 00000080 T pthread_mutex_unlock
+020102b4 000000fc T pthread_once
+020103b0 0000002c T pthread_key_create
+020103dc 0000001c T pthread_setspecific
+020103f8 0000001c T pthread_getspecific
+02010414 0000001c T pthread_key_delete
+02010430 00000014 T __libc_lock_acquire
+02010444 00000014 T __libc_lock_release
+02010458 00000014 T __libc_lock_acquire_recursive
+0201046c 00000014 T __libc_lock_release_recursive
+02010480 0000001c T __libc_cond_broadcast
+0201049c 0000001c T __libc_cond_wait
+020104b8 00000038 T getenv
+020104f0 0000014c T memcpy
+0201063c 00000080 T strlen
+020106bc 00000030 T close
+020106ec 0000008c T strcpy
+02010778 00000040 T memalign
+020107b8 00000130 T snprintf
+020108e8 00000148 T memchr
+02010a30 00000218 t _strtoul_l.isra.0
+02010c48 00000064 T strtoul
+02010cac 00000154 T strchr
+02010e00 00000124 T memcmp
+02010f24 00000040 T calloc
+02010f64 00000020 T __errno
+02010f84 00000180 T memset
+02011104 000000d8 T _vsnprintf_r
+020111dc 00000060 T vsnprintf
+0201123c 00000104 T strncpy
+02011340 0000009c T strcmp
+020113dc 00000058 T malloc
+02011434 00000030 T free
+02011464 00000078 T strrchr
+020114dc 0000013c T _findenv_r
+02011618 00000254 T memmove
+0201186c 00000030 T strdup
+0201189c 0000010c T _reclaim_reent
+020119a8 000007bc t get_arg
+02012164 000039f8 T _svfprintf_r
+02015b5c 000000c0 T strnlen
+02015c1c 000000c8 T strncmp
+02015ce4 00000090 T frexp
+02015d74 0000000c T __env_lock
+02015d80 0000000c T __env_unlock
+02015d8c 00000070 T _strdup_r
+02015dfc 00000104 T _wcrtomb_r
+02015f00 0000010c T __ssprint_r
+0201600c 0000004c T __locale_mb_cur_max
+02016058 00000340 t quorem
+02016398 00001720 T _dtoa_r
+02017ab8 00000010 T _wcsrtombs_r
+02017ac8 0000004c T _localeconv_r
+02017b14 00000194 T __ssputs_r
+02017ca8 00000108 T __utf8_wctomb
+02017db0 000001e4 T _wcsnrtombs_l
+02017f94 000000d8 T _wcsnrtombs_r
+0201806c 000000f4 T _Balloc
+02018160 00000024 T _Bfree
+02018184 00000174 T __multadd
+020182f8 00000098 T __hi0bits
+02018390 0000010c T __lo0bits
+0201849c 00000108 T __i2b
+020185a4 00000338 T __multiply
+020188dc 0000019c T __pow5mult
+02018a78 0000026c T __lshift
+02018ce4 000000dc T __mcmp
+02018dc0 00000314 T __mdiff
+020190d4 00000194 T __d2b
+02019268 00000604 T __utf8_mbtowc
+0201986c 00000380 T __umoddi3
+02019bec 00000058 T _restgpr_14_x
+02019bf0 00000054 T _restgpr_15_x
+02019bf4 00000050 T _restgpr_16_x
+02019bf8 0000004c T _restgpr_17_x
+02019bfc 00000048 T _restgpr_18_x
+02019c00 00000044 T _restgpr_19_x
+02019c04 00000040 T _restgpr_20_x
+02019c08 0000003c T _restgpr_21_x
+02019c0c 00000038 T _restgpr_22_x
+02019c10 00000034 T _restgpr_23_x
+02019c14 00000030 T _restgpr_24_x
+02019c18 0000002c T _restgpr_25_x
+02019c1c 00000028 T _restgpr_26_x
+02019c20 00000024 T _restgpr_27_x
+02019c24 00000020 T _restgpr_28_x
+02019c28 0000001c T _restgpr_29_x
+02019c2c 00000018 T _restgpr_30_x
+02019c30 00000014 T _restgpr_31_x
+02019c44 t __do_global_ctors_aux
+02019c94 T __fini
+100000fc d .LC5
+10000110 d .LC7
+10000bdc d .LC2
+10000ce0 00000018 V typeinfo name for WUPSConfigItemBoolean
+10000cf8 0000000c V typeinfo for WUPSConfigItemBoolean
+10000d04 0000001f V typeinfo name for WUPSConfigItemMultipleValues
+10000d24 0000000c V typeinfo for WUPSConfigItemMultipleValues
+10000d30 00000010 V vtable for WUPSConfigItemBoolean
+10000d40 00000010 V vtable for WUPSConfigItemMultipleValues
+10000d50 000000b0 d g_MasterPatches
+10000e00 00000010 d s_ScanModes
+10000e48 00000015 V typeinfo name for WUPSConfigCategory
+10000e60 00000010 V vtable for WUPSConfigCategory
+10000e70 00000011 V typeinfo name for WUPSConfigItem
+10000e84 00000010 V vtable for WUPSConfigItem
+10000ee8 00000004 d sReentPluginId
+10000f34 00000080 d __wut_fsa_devoptab
+10000fb4 00000042 d CSWTCH.24
+10000ff8 00000034 d __wut_nsysnet_error_code_map
+1000102c 00000022 V typeinfo name for __cxxabiv1::__class_type_info
+10001050 0000000c V typeinfo for __cxxabiv1::__class_type_info
+1000105c 0000002c V vtable for __cxxabiv1::__class_type_info
+10001088 00000027 V typeinfo name for __gnu_cxx::__concurrence_lock_error
+100010b0 0000000c V typeinfo for __gnu_cxx::__concurrence_lock_error
+100010bc 00000029 V typeinfo name for __gnu_cxx::__concurrence_unlock_error
+100010e8 0000000c V typeinfo for __gnu_cxx::__concurrence_unlock_error
+100010f4 00000014 V vtable for __gnu_cxx::__concurrence_lock_error
+10001108 00000014 V vtable for __gnu_cxx::__concurrence_unlock_error
+1000111c 0000000d V typeinfo name for std::exception
+1000112c 00000020 V typeinfo name for __cxxabiv1::__forced_unwind
+1000114c 00000024 V typeinfo name for __cxxabiv1::__foreign_exception
+100011a4 00000025 V typeinfo name for __cxxabiv1::__si_class_type_info
+100011cc 0000000c V typeinfo for __cxxabiv1::__si_class_type_info
+100011d8 0000002c V vtable for __cxxabiv1::__si_class_type_info
+10001204 0000000d V typeinfo name for std::type_info
+10001214 00000010 V typeinfo name for std::logic_error
+10001224 0000000c V typeinfo for std::logic_error
+10001230 00000011 V typeinfo name for std::length_error
+10001244 0000000c V typeinfo for std::length_error
+10001250 00000012 V typeinfo name for std::runtime_error
+10001264 0000000c V typeinfo for std::runtime_error
+10001270 00000014 V vtable for std::logic_error
+10001284 00000014 V vtable for std::length_error
+10001298 00000014 V vtable for std::runtime_error
+100012ac 0000000d V typeinfo name for std::bad_alloc
+100012bc 0000000c V typeinfo for std::bad_alloc
+100012c8 00000014 V vtable for std::bad_alloc
+1000161c 00000008 d terminator.0
+10001624 00000080 D dotab_stdnull
+100018fc 00000010 d zeroes.0
+1000190c 00000010 d blanks.1
+10001970 00000101 D _ctype_
+10001a74 0000006c D __action_table
+10001ae0 0000006c D __state_table
+10001b4c 00000100 D __chclass
+10001c4c 0000000c d p05.0
+10001c58 00000028 D __mprec_bigtens
+10001c80 000000c8 D __mprec_tens
+10001ea0 d __CTOR_LIST__
+10001ea4 D __CTOR_LIST__
+10001eac d __CTOR_END__
+10001eac D __CTOR_END__
+10001eb0 d __DTOR_LIST__
+10001eb4 D __DTOR_LIST__
+10001ebc D __DTOR_END__
+10001ec0 d __EH_FRAME_BEGIN__
+10001ec0 D __EH_FRAME_BEGIN__
+10006488 D __EH_FRAME_END__
+10006488 d __FRAME_END__
+10006490 00000001 d s_FullRGBEnabled
+10006494 00000004 d sConfigPluginIdentifier
+10006498 00000004 d sConfigAPIVersion
+1000649c 00000028 d __internal_functions
+100064c4 00000004 d sSocket
+100064c8 00000080 d __wut_socket_devoptab
+10006548 00000400 d _current_working_directory
+10006948 00001000 d handles
+10007948 0000000c d __stderr_handle
+10007954 0000000c d __stdout_handle
+10007960 0000000c d __stdin_handle
+1000796c 0000008c D devoptab_list
+100079f8 00000004 d defaultDevice
+10007a00 00000200 D _impure_data
+10007c00 00000254 D __global_locale
+10007e54 00000008 V typeinfo for WUPSConfigCategory
+10007e5c 00000008 V typeinfo for WUPSConfigItem
+10007e64 00000008 V typeinfo for std::exception
+10007e6c 00000008 V typeinfo for __cxxabiv1::__forced_unwind
+10007e74 00000008 V typeinfo for __cxxabiv1::__foreign_exception
+10007e7c 00000004 D __cxxabiv1::__unexpected_handler
+10007e80 00000008 V typeinfo for std::type_info
+10007e88 00000004 D __cxxabiv1::__terminate_handler
+10007e8c 00000004 D _impure_ptr
+10007e90 00000004 D environ
+10007ea0 00000004 B __wut_exit
+10007ea4 00000001 B __eh_globals_init::_S_init
+10007ea5 b completed.2
+10007ea8 b dtor_idx.1
+10007eac b object.0
+10007ed0 00000004 b s_SelectedResIdx
+10007ed4 00000001 b s_ThreadRegistered
+10007ed8 000006a0 b s_WatchdogThread
+10008580 00004000 b s_WatchdogThreadStack
+1000c580 00000004 b pAVMSetTVScanMode
+1000c584 00000038 b __internal_functions
+1000c5bc 00000001 b sConfigLibInitDone
+1000c5c0 00000004 b sAPIMenuGetStatus
+1000c5c4 00000004 b sAPIItemDestroy
+1000c5c8 00000004 b sAPIItemCreateEx
+1000c5cc 00000004 b sAPICategoryAddItem
+1000c5d0 00000004 b sAPICategoryAddCategory
+1000c5d4 00000004 b sAPICategoryDestroy
+1000c5d8 00000004 b sAPICategoryCreateEx
+1000c5dc 00000004 b sAPIInitEx
+1000c5e0 00000004 b sAPIGetVersion
+1000c5e4 00000004 b sModuleHandle
+1000c5e8 00000004 b __wut_socket_devoptab_added
+1000c5ec 00000008 b __internal_functions
+1000c5f4 00000004 b sHeapSize
+1000c5f8 00000004 b sHeapMaxSize
+1000c5fc 00000004 b sHeapBase
+1000c600 00000004 b sHeapHandle
+1000c610 00000010 b sMallocSpinLock
+1000c620 00000010 b sSyncSpinLock
+1000c630 00000040 b sHandlers
+1000c670 00000010 b sSendAddr
+1000c680 000003b8 B __wut_fsa_device_data
+1000ca38 00000018 b (anonymous namespace)::emergency_pool
+1000ca50 00000004 b init
+1000ca54 00000008 b (anonymous namespace)::eh_globals
+1000ca5c 00000010 V std::string::_Rep::_S_empty_rep_storage
+1000ca6c 00000004 b (anonymous namespace)::__new_handler
+1000ca70 00000004 b once_regsizes.0
+1000ca74 00000070 b dwarf_reg_size_table
+1000cae4 0000000c b object_mutex
+1000caf0 00000004 b seen_objects
+1000caf4 00000004 b unseen_objects
+1000caf8 00000400 b temp_cwd
+1000cef8 00000004 b __hndl_lock
+1000cefc 00000004 b __pthread_once_cv
+1000cf00 00000004 b __pthread_once_lock
+1000cf08 00000150 B __sf
+1000d058 00000008 b __env_recursive_mutex
+1000d060 00000004 b initial_env
+1000d064 0000009b R wups_meta_info_linking_order
+1000d100 00000017 R wups_meta_storage_id
+1000d118 0000000e R wups_meta_license
+1000d128 0000000e R wups_meta_author
+1000d138 00000016 R wups_meta_version
+1000d150 00000020 R wups_meta_description
+1000d170 0000004b R wups_meta_info_dump
+1000d1bc 00000016 R wups_meta_plugin_name
+1000d1d4 00000024 R wups_meta_buildtimestamp
+1000d1f8 0000000b R wups_meta_wups
+1000d204 0000001b R wups_meta_name
+1000d220 00000008 R wups_hooks_on_app_requests_exit
+1000d228 00000008 R wups_hooks_on_app_ending
+1000d230 00000008 R wups_hooks_on_app_starting
+1000d238 00000008 R wups_hooks_deinit_plugin
+1000d240 00000008 R wups_hooks_init_plugin
+1000d248 00000008 R wups_hooks_init_storage
+1000d250 00000008 R wups_hooks_on_fini_wut_devoptab
+1000d258 00000008 R wups_hooks_on_init_wut_devoptab
+1000d260 00000008 R wups_hooks_wups_init_reent_functions
+1000d268 00000008 R wups_hooks_wups_init_button_combo_functions
+1000d270 00000008 R wups_hooks_wups_init_config_functions
+1000d278 00000008 R wups_hooks___fini_wrapper
+1000d280 00000008 R wups_hooks___init_wrapper
+1000d288 00000008 R wups_hooks_on_init_wut_thread
+1000d290 00000008 R wups_hooks_on_fini_wut_stdcpp
+1000d298 00000008 R wups_hooks_on_init_wut_stdcpp
+1000d2a0 00000008 R wups_hooks_on_fini_wut_newlib
+1000d2a8 00000008 R wups_hooks_on_init_wut_newlib
+1000d2b0 00000008 R wups_hooks_on_fini_wut_sockets
+1000d2b8 00000008 R wups_hooks_on_init_wut_sockets
+1000d2c0 00000008 R wups_hooks_on_fini_wut_malloc
+1000d2c8 00000008 R wups_hooks_on_init_wut_malloc
+c0000038 T DCFlushRange
+c0000040 T FSAAddClient
+c0000048 T FSAChangeDir
+c0000050 T FSAChangeMode
+c0000058 T FSACloseDir
+c0000060 T FSACloseFile
+c0000068 T FSADelClient
+c0000070 T FSAFlushFile
+c0000078 T FSAGetDeviceInfo
+c0000080 T FSAGetFreeSpaceSize
+c0000088 T FSAGetStat
+c0000090 T FSAGetStatFile
+c0000098 T FSAInit
+c00000a0 T FSAMakeDir
+c00000a8 T FSAMount
+c00000b0 T FSAOpenDir
+c00000b8 T FSAOpenFileEx
+c00000c0 T FSAReadDir
+c00000c8 T FSAReadFile
+c00000d0 T FSARemove
+c00000d8 T FSARename
+c00000e0 T FSARewindDir
+c00000e8 T FSASetPosFile
+c00000f0 T FSATruncateFile
+c00000f8 T FSAUnmount
+c0000100 T FSAWriteFile
+c0000108 T ICInvalidateRange
+c0000110 T MEMFreeToExpHeap
+c0000118 T MEMGetSizeForMBlockExpHeap
+c0000120 T OSCancelAlarm
+c0000128 T OSCreateAlarm
+c0000130 T OSCreateThread
+c0000138 T OSDynLoad_Acquire
+c0000140 T OSDynLoad_FindExport
+c0000148 T OSEffectiveToPhysical
+c0000150 T OSFastCond_Init
+c0000158 T OSFastCond_Signal
+c0000160 T OSFastCond_Wait
+c0000168 T OSFastMutex_Init
+c0000170 T OSFastMutex_Lock
+c0000178 T OSFastMutex_Unlock
+c0000180 T OSFatal
+c0000188 T OSGetAlarmUserData
+c0000190 T OSGetCurrentThread
+c0000198 T OSGetSystemInfo
+c00001a0 T OSInitMutexEx
+c00001a8 T OSInitSpinLock
+c00001b0 T OSJoinThread
+c00001b8 T OSLockMutex
+c00001c0 T OSReport
+c00001c8 T OSResumeThread
+c00001d0 T OSSetAlarm
+c00001d8 T OSSetAlarmUserData
+c00001e0 T OSSleepTicks
+c00001e8 T OSUninterruptibleSpinLock_Acquire
+c00001f0 T OSUninterruptibleSpinLock_Release
+c00001f8 T OSUnlockMutex
+c0000200 T __rplwrap_exit
+c0000230 T htonl
+c0000238 T htons
+c0000240 T socket_lib_init
+c0000248 T __rplwrap_recv
+c0000250 T __rplwrap_send
+c0000258 T __rplwrap_sendto
+c0000260 T __rplwrap_setsockopt
+c0000268 T __rplwrap_shutdown
+c0000270 T __rplwrap_socket
+c0000278 T __rplwrap_socketclose
+c0000280 T __rplwrap_socketlasterr
+c00002a8 R MEMAllocFromDefaultHeap
+c00002b0 R MEMAllocFromDefaultHeapEx
+c00002b8 R MEMFreeToDefaultHeap
