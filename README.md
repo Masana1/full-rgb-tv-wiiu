@@ -1,57 +1,106 @@
-# Example plugin
+Markdown
+# 📺 Full RGB TV & Video Mode Switcher for Wii U (Aroma)
 
-This is just a simple example plugin which can be used as a template.
-The plugin logs the FSOpenFile calls via UDP (**Only when build via `make DEBUG=1`**).
+[![WUPS](https://img.shields.io/badge/Platform-Wii%20U%20%28Aroma%29-blue.svg)](https://aroma.foryour.cafe/)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+[![Release](https://img.shields.io/badge/Release-v1.0.0--beta.3-green.svg)](https://github.com/Masana1/full-rgb-tv-wiiu/releases)
 
-The logging can be enabled/disabled via the WUPS Config menu (press L, DPAD Down and Minus on the GamePad, Pro Controller or Classic Controller).
+A native **WUPS plugin** for Nintendo Wii U (Aroma) that forces **Full Range RGB (0–255)** color output over HDMI and provides a **dynamic on-the-fly video mode switcher** with extended display resolutions.
 
-## Installation
+---
 
-(`[ENVIRONMENT]` is a placeholder for the actual environment name.)
+## 🌟 Overview & Why This Plugin?
 
-1. Copy the file `ExamplePlugin.wps` into `sd:/wiiu/environments/[ENVIRONMENT]/plugins`.
-2. Requires the [WiiUPluginLoaderBackend](https://github.com/wiiu-env/WiiUPluginLoaderBackend) in `sd:/wiiu/environments/[ENVIRONMENT]/modules`.
+* **Native Full RGB (0–255):** By default, the Wii U outputs HDMI video strictly in **Limited Range RGB (16–235)**. On modern PC monitors, OLED screens, HDMI capture cards, and TVs expecting Full RGB, this causes washed-out blacks, grey tinting, and inaccurate color tracking. This plugin injects custom display buffers directly into memory to force true **Full RGB (0–255)** output.
+* **On-the-Fly Video Switching:** Switch video output resolutions and refresh rates instantly from the Aroma configuration menu without exiting to the Wii U System Settings.
+* **Extended Display Modes:** Unlocks native access to extended modes, including **720p 3D Frame Packing**, 50Hz/60Hz interlaced and progressive modes, as well as legacy analog modes (Composite & SCART PAL60).
 
-Start the environment (e.g Aroma) and the backend should load the plugin.
+---
 
-## Building
+## ✨ Features
 
-For building you need:
+* 🎨 **Full RGB Color Range (0–255):** Enjoy deep blacks and accurate color reproduction.
+* ⚡ **Instant Switch:** Change resolutions on-the-fly directly inside games, homebrew, or the Wii U Menu.
+* 💾 **Apply on Boot (Persistence):** Save your Full RGB configuration to persist across coldboots via the WUPS Storage API.
+* 📺 **Extended Video Modes Supported:**
+  * **Composite / Analog:** 480i (NTSC 60Hz), 576i (PAL 50Hz), 480i PAL60 (60Hz)
+  * **HDMI Standard:** 480p (60Hz), 576p (50Hz), 720p (50Hz & 60Hz), 1080i (50Hz & 60Hz), 1080p (50Hz & 60Hz)
+  * **HDMI 3D:** 720p 3D Frame Packing
+* 🔒 **Direct Hardware Driver Control:** Patches `tve.rpl` and `avm.rpl` at low level to prevent HDMI clock/PLL drops (*No Signal* black screens).
+* 🌍 **Multi-Region Architecture:** Built-in auto-detection for EUR consoles with dedicated static offset tables ready for USA and JPN regions.
 
-- [wups](https://github.com/Maschell/WiiUPluginSystem)
-- [wut](https://github.com/devkitpro/wut)
+---
 
-Install them (in this order) according to their README's. Don't forget the dependencies of the libs itself.
+## 📥 Installation
 
-Then you should be able to compile via `make` (with no logging) or `make DEBUG=1` (with logging).
+1. Download the latest `full_rgb_TV.wps` from the [Releases](https://github.com/Masana1/full-rgb-tv-wiiu/releases) section.
+2. Copy `full_rgb_TV.wps` to your SD card at:
+   ```text
+   sd:/wiiu/environments/aroma/plugins/
+Make sure WiiUPluginLoaderBackend is present in:
 
-## Buildflags
+Plaintext
+sd:/wiiu/environments/aroma/modules/
+Insert the SD card into your Wii U and boot into Aroma.
 
-### Logging
+🎮 Usage
+Open the WUPS Config Menu at any time by pressing:
 
-Building via `make` only logs errors (via OSReport). To enable logging via the [LoggingModule](https://github.com/wiiu-env/LoggingModule) set `DEBUG` to `1` or `VERBOSE`.
+L + D-Pad Down + Minus (-) on the GamePad, Wii U Pro Controller, or Classic Controller.
 
-`make` Logs errors only (via OSReport).  
-`make DEBUG=1` Enables information and error logging via [LoggingModule](https://github.com/wiiu-env/LoggingModule).  
-`make DEBUG=VERBOSE` Enables verbose information and error logging via [LoggingModule](https://github.com/wiiu-env/LoggingModule).
+Select Full RGB TV:
 
-If the [LoggingModule](https://github.com/wiiu-env/LoggingModule) is not present, it'll fallback to UDP (Port 4405) and [CafeOS](https://github.com/wiiu-env/USBSerialLoggingModule) logging.
+Full RGB Mode:
 
-## Building using the Dockerfile
+Disabled: Standard limited range RGB (16–235).
 
-It's possible to use a docker image for building. This way you don't need anything installed on your host system.
+Enabled (Session only): Forces Full RGB (0–255) for the current session.
 
-```
-# Build docker image (only needed once)
-docker build . -t example-plugin-builder
+Enabled (Apply on Boot): Forces Full RGB (0–255) and saves it permanently for future coldboots.
 
-# make 
-docker run -it --rm -v ${PWD}:/project example-plugin-builder make DEBUG=1
+Video Mode / Resolution: Choose your target resolution and refresh rate.
 
-# make clean
-docker run -it --rm -v ${PWD}:/project example-plugin-builder make clean
-```
+🛠️ Building from Source
+Prerequisites
+devkitPPC
 
+wut
+
+wups
+
+Compilation
+Bash
+# Build standard release
+make
+
+# Build debug release (with UDP logging on port 4405)
+make DEBUG=1
+
+# Clean build directory
+make clean
+Building with Docker
+Bash
+# 1. Build the docker container
+docker build . -t full-rgb-tv-builder
+
+# 2. Compile
+docker run -it --rm -v ${PWD}:/project full-rgb-tv-builder make
+
+# 3. Clean
+docker run -it --rm -v ${PWD}:/project full-rgb-tv-builder make clean
+🙏 Special Thanks & Acknowledgments
+Masana: Plugin author and reverse-engineering of AVM/TVE video registers.
+
+Aroma Team: For the Aroma custom firmware environment.
+
+Maschell & wiiu-env: For the Wii U Plugin System (WUPS) framework and devkit tools.
+
+devkitPro: For maintaining the devkitPPC and WUT toolchains.
+
+The Wii U Homebrew Community: For continuous support, testing, and feedback.
+
+📜 License
+This project is licensed under the GNU General Public License v3.0 (GPLv3). See the LICENSE file for details.
 ## Format the code via docker
 
 `docker run --rm -v ${PWD}:/src ghcr.io/wiiu-env/clang-format:13.0.0-2 -r ./src -i`
