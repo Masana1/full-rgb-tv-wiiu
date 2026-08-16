@@ -32,7 +32,6 @@ main.o: \
  C:\devkitPro/wups/include/wups/storage.h \
  C:\devkitPro/wups/include/wups/meta.h \
  C:\devkitPro/wups/include/wups/wups_debug.h \
- C:\devkitPro/wups/include/wups/config/WUPSConfigItemBoolean.h \
  C:\devkitPro/wups/include/wups/config/WUPSConfigItemMultipleValues.h
 C:\devkitPro/wut/include/coreinit/cache.h:
 C:\devkitPro/wut/include/wut.h:
@@ -68,5 +67,4 @@ C:\devkitPro/wups/include/wups/reent_internal.h:
 C:\devkitPro/wups/include/wups/storage.h:
 C:\devkitPro/wups/include/wups/meta.h:
 C:\devkitPro/wups/include/wups/wups_debug.h:
-C:\devkitPro/wups/include/wups/config/WUPSConfigItemBoolean.h:
 C:\devkitPro/wups/include/wups/config/WUPSConfigItemMultipleValues.h:
