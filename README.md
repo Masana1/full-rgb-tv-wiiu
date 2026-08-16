@@ -27,7 +27,6 @@ A native **WUPS plugin** for Nintendo Wii U (Aroma) that forces **Full Range RGB
   * **HDMI Standard:** 480p (60Hz), 576p (50Hz), 720p (50Hz & 60Hz), 1080i (50Hz & 60Hz), 1080p (50Hz & 60Hz)
   * **HDMI 3D:** 720p 3D Frame Packing
 * 🔒 **Direct Hardware Driver Control:** Patches `tve.rpl` and `avm.rpl` at low level to prevent HDMI clock/PLL drops (*No Signal* black screens).
-* 🌍 **Multi-Region Architecture:** Built-in auto-detection for EUR consoles with dedicated static offset tables ready for USA and JPN regions.
 
 ---
 
