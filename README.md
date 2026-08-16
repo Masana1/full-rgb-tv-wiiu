@@ -86,18 +86,13 @@ docker build . -t full-rgb-tv-builder
 # 2. Compile
 docker run -it --rm -v ${PWD}:/project full-rgb-tv-builder make
 
-# 3. Clean
-docker run -it --rm -v ${PWD}:/project full-rgb-tv-builder make clean
-🙏 Special Thanks & Acknowledgments
-Masana: Plugin author and reverse-engineering of AVM/TVE video registers.
+## 🙏 Special Thanks & Acknowledgments
 
-Aroma Team: For the Aroma custom firmware environment.
-
-Maschell & wiiu-env: For the Wii U Plugin System (WUPS) framework and devkit tools.
-
-devkitPro: For maintaining the devkitPPC and WUT toolchains.
-
-The Wii U Homebrew Community: For continuous support, testing, and feedback.
+* **Google Gemini:** AI pairing assistant for architectural troubleshooting, code refactoring, and documentation.
+* **[Aroma Team](https://aroma.foryour.cafe/):** For the Aroma custom firmware environment.
+* **[Maschell](https://github.com/Maschell) & [wiiu-env](https://github.com/wiiu-env):** For the Wii U Plugin System (WUPS) framework and devkit tools.
+* **[devkitPro](https://devkitpro.org/):** For maintaining the devkitPPC and WUT toolchains.
+* **The Wii U Homebrew Community:** For continuous support, testing, and feedback.
 
 📜 License
 This project is licensed under the GNU General Public License v3.0 (GPLv3). See the LICENSE file for details.
