@@ -45,6 +45,12 @@ Install them according to their instructions, then compile using:
 
 make
 
+### 🙏 Credits & Acknowledgments
+* **Maschell & Aroma Team:** For the [Wii U Plugin System (WUPS)](https://github.com/Maschell/WiiUPluginSystem) and the Aroma environment.
+* **devkitPro & WUT Team:** For the toolchains and libraries powering Wii U homebrew development.
+* **Gemini (Google):** For collaborative support with code analysis, patch structure, and documentation.
+* **The Wii U Homebrew Community:** For continuous reverse-engineering efforts, documentation, and tools.
+
 📜 License
 This project is licensed under the GPLv3 license. See the LICENSE file for details.
 
@@ -96,6 +102,12 @@ wut
 Installez-les selon leurs instructions, puis compilez via :
 
 make
+
+### 🙏 Remerciements & Crédits
+* **Maschell & l'équipe Aroma :** Pour le [Wii U Plugin System (WUPS)](https://github.com/Maschell/WiiUPluginSystem) et l'environnement Aroma.
+* **devkitPro & l'équipe WUT :** Pour les chaînes de compilation et bibliothèques indispensables au développement sur Wii U.
+* **Gemini (Google) :** Pour la collaboration sur l'analyse de code, l'intégration des patchs et la documentation.
+* **La communauté Homebrew Wii U :** Pour l'ensemble des recherches, des outils et du partage de connaissances.
 
 📜 Licence
 Ce projet est sous licence GPLv3. Voir le fichier LICENSE pour plus de détails.
