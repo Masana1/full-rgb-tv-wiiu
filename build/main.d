@@ -13,7 +13,6 @@ main.o: \
  C:\devkitPro/wut/include/coreinit/systeminfo.h \
  C:\devkitPro/wut/include/coreinit/exception.h \
  C:\devkitPro/wut/include/coreinit/memory.h \
- C:\devkitPro/wut/include/coreinit/title.h \
  C:\devkitPro/wut/include/whb/log.h \
  C:\devkitPro/wut/include/whb/log_udp.h C:\devkitPro/wups/include/wups.h \
  C:\devkitPro/wups/include/wups/common.h \
@@ -49,7 +48,6 @@ C:\devkitPro/wut/include/coreinit/time.h:
 C:\devkitPro/wut/include/coreinit/systeminfo.h:
 C:\devkitPro/wut/include/coreinit/exception.h:
 C:\devkitPro/wut/include/coreinit/memory.h:
-C:\devkitPro/wut/include/coreinit/title.h:
 C:\devkitPro/wut/include/whb/log.h:
 C:\devkitPro/wut/include/whb/log_udp.h:
 C:\devkitPro/wups/include/wups.h:
