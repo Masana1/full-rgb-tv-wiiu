@@ -91,6 +91,7 @@ docker run -it --rm -v ${PWD}:/project full-rgb-tv-builder make
 * **[Aroma Team](https://aroma.foryour.cafe/):** For the Aroma custom firmware environment.
 * **[Maschell](https://github.com/Maschell) & [wiiu-env](https://github.com/wiiu-env):** For the Wii U Plugin System (WUPS) framework and devkit tools.
 * **[devkitPro](https://devkitpro.org/):** For maintaining the devkitPPC and WUT toolchains.
+* **[Lynx64](https://github.com/Lynx64) & [FIX94](https://github.com/FIX94):** For their work on [wiiu-video-mode-changer](https://github.com/Lynx64/wiiu-video-mode-changer) and video mode switching routines.
 * **The Wii U Homebrew Community:** For continuous support, testing, and feedback.
 
 📜 License
