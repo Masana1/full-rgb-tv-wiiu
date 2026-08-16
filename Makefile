@@ -1,145 +1,103 @@
-#-------------------------------------------------------------------------------
-.SUFFIXES:
-#-------------------------------------------------------------------------------
+Markdown
+# 📺 Full RGB TV & Video Mode Switcher for Wii U (Aroma)
 
-ifeq ($(strip $(DEVKITPRO)),)
-$(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/devkitpro")
-endif
+[![WUPS](https://img.shields.io/badge/Platform-Wii%20U%20%28Aroma%29-blue.svg)](https://aroma.foryour.cafe/)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+[![Release](https://img.shields.io/badge/Release-v1.0.0--beta.3-green.svg)](https://github.com/Masana1/full-rgb-tv-wiiu/releases)
 
-TOPDIR ?= $(CURDIR)
+A native **WUPS plugin** for Nintendo Wii U (Aroma) that forces **Full Range RGB (0–255)** color output over HDMI and provides a **dynamic on-the-fly video mode switcher** with extended display resolutions.
 
-include $(DEVKITPRO)/wups/share/wups_rules
+---
 
-WUT_ROOT := $(DEVKITPRO)/wut
-#-------------------------------------------------------------------------------
-# TARGET is the name of the output
-# BUILD is the directory where object files & intermediate files will be placed
-# SOURCES is a list of directories containing source code
-# DATA is a list of directories containing data files
-# INCLUDES is a list of directories containing header files
-#-------------------------------------------------------------------------------
-TARGET		:=	ExamplePluginCPP
-BUILD		:=	build
-SOURCES		:=	src src/utils
-DATA		:=	data
-INCLUDES	:=	src
+## 🌟 Overview & Why This Plugin?
 
-#-------------------------------------------------------------------------------
-# options for code generation
-#-------------------------------------------------------------------------------
-CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
-			$(MACHDEP)
+* **Native Full RGB (0–255):** By default, the Wii U outputs HDMI video strictly in **Limited Range RGB (16–235)**. On modern PC monitors, OLED screens, HDMI capture cards, and TVs expecting Full RGB, this causes washed-out blacks, grey tinting, and inaccurate color tracking. This plugin injects custom display buffers directly into memory to force true **Full RGB (0–255)** output.
+* **On-the-Fly Video Switching:** Switch video output resolutions and refresh rates instantly from the Aroma configuration menu without exiting to the Wii U System Settings.
+* **Extended Display Modes:** Unlocks native access to extended modes, including **720p 3D Frame Packing**, 50Hz/60Hz interlaced and progressive modes, as well as legacy analog modes (Composite & SCART PAL60).
 
-CFLAGS	+=	$(INCLUDE) -D__WIIU__ -D__WUT__ -D__WUPS__ 
+---
 
-CXXFLAGS	:= $(CFLAGS) -std=c++20
+## ✨ Features
 
-ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-g $(ARCH) $(RPXSPECS) -Wl,-Map,$(notdir $*.map) $(WUPSSPECS) 
+* 🎨 **Full RGB Color Range (0–255):** Enjoy deep blacks and accurate color reproduction.
+* ⚡ **Instant Switch:** Change resolutions on-the-fly directly inside games, homebrew, or the Wii U Menu.
+* 💾 **Apply on Boot (Persistence):** Save your Full RGB configuration to persist across coldboots via the WUPS Storage API.
+* 📺 **Extended Video Modes Supported:**
+  * **Composite / Analog:** 480i (NTSC 60Hz), 576i (PAL 50Hz), 480i PAL60 (60Hz)
+  * **HDMI Standard:** 480p (60Hz), 576p (50Hz), 720p (50Hz & 60Hz), 1080i (50Hz & 60Hz), 1080p (50Hz & 60Hz)
+  * **HDMI 3D:** 720p 3D Frame Packing
+* 🔒 **Direct Hardware Driver Control:** Patches `tve.rpl` and `avm.rpl` at low level to prevent HDMI clock/PLL drops (*No Signal* black screens).
+* 🌍 **Multi-Region Architecture:** Built-in auto-detection for EUR consoles with dedicated static offset tables ready for USA and JPN regions.
 
-ifeq ($(DEBUG),1)
-CXXFLAGS += -DDEBUG -g
-CFLAGS += -DDEBUG -g
-endif
+---
 
-ifeq ($(DEBUG),VERBOSE)
-CXXFLAGS += -DDEBUG -DVERBOSE_DEBUG -g
-CFLAGS += -DDEBUG -DVERBOSE_DEBUG -g
-endif
+## 📥 Installation
 
-LIBS	:= -lwups -lwut 
+1. Download the latest `full_rgb_TV.wps` from the [Releases](https://github.com/Masana1/full-rgb-tv-wiiu/releases) section.
+2. Copy `full_rgb_TV.wps` to your SD card at:
+   ```text
+   sd:/wiiu/environments/aroma/plugins/
+Make sure WiiUPluginLoaderBackend is present in:
 
-#-------------------------------------------------------------------------------
-# list of directories containing libraries, this must be the top level
-# containing include and lib
-#-------------------------------------------------------------------------------
-LIBDIRS	:= $(PORTLIBS) $(WUPS_ROOT) $(WUT_ROOT)
+Plaintext
+sd:/wiiu/environments/aroma/modules/
+Insert the SD card into your Wii U and boot into Aroma.
 
-#-------------------------------------------------------------------------------
-# no real need to edit anything past this point unless you need to add additional
-# rules for different file extensions
-#-------------------------------------------------------------------------------
-ifneq ($(BUILD),$(notdir $(CURDIR)))
-#-------------------------------------------------------------------------------
+🎮 Usage
+Open the WUPS Config Menu at any time by pressing:
 
-export OUTPUT	:=	$(CURDIR)/$(TARGET)
-export TOPDIR	:=	$(CURDIR)
+L + D-Pad Down + Minus (-) on the GamePad, Wii U Pro Controller, or Classic Controller.
 
-export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
-			$(foreach dir,$(DATA),$(CURDIR)/$(dir))
+Select Full RGB TV:
 
-export DEPSDIR	:=	$(CURDIR)/$(BUILD)
+Full RGB Mode:
 
-CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
-CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
-SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
-BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
+Disabled: Standard limited range RGB (16–235).
 
-#-------------------------------------------------------------------------------
-# use CXX for linking C++ projects, CC for standard C
-#-------------------------------------------------------------------------------
-ifeq ($(strip $(CPPFILES)),)
-#-------------------------------------------------------------------------------
-	export LD	:=	$(CC)
-#-------------------------------------------------------------------------------
-else
-#-------------------------------------------------------------------------------
-	export LD	:=	$(CXX)
-#-------------------------------------------------------------------------------
-endif
-#-------------------------------------------------------------------------------
+Enabled (Session only): Forces Full RGB (0–255) for the current session.
 
-export OFILES_BIN	:=	$(addsuffix .o,$(BINFILES))
-export OFILES_SRC	:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
-export OFILES 	:=	$(OFILES_BIN) $(OFILES_SRC)
-export HFILES_BIN	:=	$(addsuffix .h,$(subst .,_,$(BINFILES)))
+Enabled (Apply on Boot): Forces Full RGB (0–255) and saves it permanently for future coldboots.
 
-export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
-			$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-			-I$(CURDIR)/$(BUILD)
+Video Mode / Resolution: Choose your target resolution and refresh rate.
 
-export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
+🛠️ Building from Source
+Prerequisites
+devkitPPC
 
-.PHONY: $(BUILD) clean all
+wut
 
-#-------------------------------------------------------------------------------
-all: $(BUILD)
+wups
 
-$(BUILD):
-	@$(shell [ ! -d $(BUILD) ] && mkdir -p $(BUILD))
-	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+Compilation
+Bash
+# Build standard release
+make
 
-#-------------------------------------------------------------------------------
-clean:
-	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).wps $(TARGET).elf
+# Build debug release (with UDP logging on port 4405)
+make DEBUG=1
 
-#-------------------------------------------------------------------------------
-else
-.PHONY:	all
+# Clean build directory
+make clean
+Building with Docker
+Bash
+# 1. Build the docker container
+docker build . -t full-rgb-tv-builder
 
-DEPENDS	:=	$(OFILES:.o=.d)
+# 2. Compile
+docker run -it --rm -v ${PWD}:/project full-rgb-tv-builder make
 
-#-------------------------------------------------------------------------------
-# main targets
-#-------------------------------------------------------------------------------
-all	:	$(OUTPUT).wps
+# 3. Clean
+docker run -it --rm -v ${PWD}:/project full-rgb-tv-builder make clean
+🙏 Special Thanks & Acknowledgments
+Masana: Plugin author and reverse-engineering of AVM/TVE video registers.
 
-$(OUTPUT).wps	:	$(OUTPUT).elf
-$(OUTPUT).elf	:	$(OFILES)
+Aroma Team: For the Aroma custom firmware environment.
 
-$(OFILES_SRC)	: $(HFILES_BIN)
+Maschell & wiiu-env: For the Wii U Plugin System (WUPS) framework and devkit tools.
 
-#-------------------------------------------------------------------------------
-# you need a rule like this for each extension you use as binary data
-#-------------------------------------------------------------------------------
-%.bin.o	%_bin.h :	%.bin
-#-------------------------------------------------------------------------------
-	@echo $(notdir $<)
-	@$(bin2o)
+devkitPro: For maintaining the devkitPPC and WUT toolchains.
 
--include $(DEPENDS)
+The Wii U Homebrew Community: For continuous support, testing, and feedback.
 
-#-------------------------------------------------------------------------------
-endif
-#-------------------------------------------------------------------------------
+📜 License
+This project is licensed under the GNU General Public License v3.0 (GPLv3). See the LICENSE file for details.
