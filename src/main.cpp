@@ -1,204 +1,595 @@
-﻿#include <coreinit/cache.h>
+﻿#include <avm/tv.h>
+#include <coreinit/cache.h>
 #include <coreinit/dynload.h>
 #include <coreinit/memory.h>
+#include <coreinit/thread.h>
+#include <coreinit/time.h>
+#include <coreinit/title.h>
 #include <cstdint>
 #include <cstring>
-#include <whb/log.h>
-#include <whb/log_udp.h>
+#include <exception>
+#include <vpad/input.h>
 #include <wups.h>
 #include <wups/config/WUPSConfigCategory.h>
 #include <wups/config/WUPSConfigItemMultipleValues.h>
 #include <wups/config_api.h>
+#include <wups/storage.h>
 
 WUPS_PLUGIN_NAME("Full RGB TV");
-WUPS_PLUGIN_DESCRIPTION("Full RGB TV & Unified Video Switcher");
-WUPS_PLUGIN_VERSION("v1.0.0-beta.3");
+WUPS_PLUGIN_DESCRIPTION("Full RGB TV & Video Mode Changer");
+WUPS_PLUGIN_VERSION("v1.0.0-beta.4");
 WUPS_PLUGIN_AUTHOR("Masana");
 WUPS_PLUGIN_LICENSE("GPLv3");
 
-WUPS_USE_WUT_DEVOPTAB();
-WUPS_USE_STORAGE("full_rgb_TV");
+WUPS_USE_STORAGE("Full_RGB_TV");
 
-#define LOG(fmt, ...) WHBLogPrintf("[FULL_RGB_TV] " fmt "\n", ##__VA_ARGS__)
-
-extern "C" uint32_t OSEffectiveToPhysical(uint32_t addr);
-
-typedef struct {
-    uint32_t addr;
-    uint32_t patchVal;
-    uint32_t standardVal;
-    const char *desc;
-} MemoryPatch;
+#ifndef WUPS_STORAGE_ROOT_ITEM
+#define WUPS_STORAGE_ROOT_ITEM ((wups_storage_item) 0)
+#endif
 
 // ============================================================================
-// TARGETED HDMI MASTER PATCHES
+// WII U MENU DETECTION (WARAWARA PLAZA)
 // ============================================================================
-static const MemoryPatch g_MasterPatches[] = {
-        // --- 1. AVM.RPL ---
-        {0x00FB6684, 0x38E00001, 0x38E00000, "AVM Color Config Force Full #1"},
-        {0x00FE5F2C, 0x38E00001, 0x38E00000, "AVM Color Config Force Full #2"},
+static inline bool IsWiiUMenu() {
+    uint64_t tid = OSGetTitleID();
+    return (tid == 0x0005001010040200ull || // Europe
+            tid == 0x0005001010040100ull || // USA
+            tid == 0x0005001010040000ull);  // Japan
+}
 
-        // --- 2. TVE.RPL ---
-        {0x0115248C, 0x60000000, 0x60000000, "TVE Bypass 1080p Skip (always nop)"},
-        {0x01152490, 0x3880002A, 0x38800010, "TVE HDMI AVI InfoFrame PB3 Full/Limited"}};
-
-#define TOTAL_PATCHES (sizeof(g_MasterPatches) / sizeof(MemoryPatch))
-
+// ============================================================================
+// AVM PROTOTYPES & DYNAMIC LOADING
+// ============================================================================
 typedef int32_t (*AVMSetTVScanMode_t)(uint32_t mode);
-typedef int32_t (*TVESetTVScanMode_t)(uint32_t mode);
+typedef int32_t (*AVMSetTVTileMode_t)(uint8_t mode);
+typedef int32_t (*AVMSetTVVideoRegion_t)(AVMTvVideoRegion region, TVEPort port, AVMTvResolution res);
+typedef int32_t (*AVMSetTVOutPort_t)(TVEPort port, AVMTvResolution res);
+typedef int32_t (*AVMSetTVScanResolution_t)(AVMTvResolution res);
+typedef int32_t (*AVMSetTVAspectRatio_t)(AVMTvAspectRatio ratio);
 
 // ============================================================================
-// ENUMERATIONS & MENU OPTIONS
+// SAFE MEMORY ACCESS & CACHE FLUSH
 // ============================================================================
-enum RGBModeOptions : uint32_t {
-    RGB_DISABLED      = 0,
-    RGB_ENABLED       = 1,
-    RGB_APPLY_ON_BOOT = 2,
-};
+static bool IsValidAddress(uint32_t addr) {
+    bool inMEM1 = (addr >= 0x00800000 && addr < 0x02000000);
+    bool inMEM2 = (addr >= 0x10000000 && addr < 0x50000000);
+    return (inMEM1 || inMEM2);
+}
 
-enum ResolutionOptions : uint32_t {
-    RES_ANALOG_480I       = 0,
-    RES_ANALOG_576I       = 1,
-    RES_ANALOG_480I_PAL60 = 2,
-    RES_HDMI_480P_60      = 3,
-    RES_HDMI_576P_50      = 4,
-    RES_HDMI_720P_50      = 5,
-    RES_HDMI_720P_60      = 6,
-    RES_HDMI_720P_3D      = 7,
-    RES_HDMI_1080I_50     = 8,
-    RES_HDMI_1080I_60     = 9,
-    RES_HDMI_1080P_50     = 10,
-    RES_HDMI_1080P_60     = 11,
-};
+static uint32_t ReadCode32Safe(uint32_t addr) {
+    if (!IsValidAddress(addr)) {
+        return 0;
+    }
+    volatile uint32_t *ptr = reinterpret_cast<volatile uint32_t *>(addr);
+    return *ptr;
+}
 
-#define RES_STORAGE_KEY      "selected_resolution"
-#define RGB_MODE_STORAGE_KEY "rgb_mode_selection"
+static bool WriteCode32Safe(uint32_t addr, uint32_t val) {
+    if (!IsValidAddress(addr)) {
+        return false;
+    }
 
-#define DEFAULT_RES_IDX      RES_HDMI_1080P_60
-#define DEFAULT_RGB_MODE     RGB_DISABLED
+    volatile uint32_t *ptr = reinterpret_cast<volatile uint32_t *>(addr);
+    *ptr                   = val;
 
-static uint32_t s_SelectedResIdx  = DEFAULT_RES_IDX;
-static uint32_t s_SelectedRGBMode = DEFAULT_RGB_MODE;
-
-static uint32_t s_AppliedResIdx  = DEFAULT_RES_IDX;
-static uint32_t s_AppliedRGBMode = DEFAULT_RGB_MODE;
-static bool s_ColdbootDone       = false;
-
-static const uint32_t s_ScanModes[] = {
-        2, 1, 8, 3, 9, 10, 4, 5, 11, 6, 12, 7};
-
-static constexpr WUPSConfigItemMultipleValues::ValuePair s_PossibleRGBModes[] = {
-        {RGB_DISABLED, "Disabled"},
-        {RGB_ENABLED, "Enabled (Session only)"},
-        {RGB_APPLY_ON_BOOT, "Enabled (Apply on Boot)"},
-};
-
-static constexpr WUPSConfigItemMultipleValues::ValuePair s_PossibleResolutions[] = {
-        {RES_ANALOG_480I, "[Composite] 480i (NTSC 60Hz)"},
-        {RES_ANALOG_576I, "[Composite] 576i (PAL 50Hz)"},
-        {RES_ANALOG_480I_PAL60, "[SCART] 480i PAL60 (60Hz)"},
-        {RES_HDMI_480P_60, "[HDMI] 480p 60Hz (Progressive)"},
-        {RES_HDMI_576P_50, "[HDMI] 576p 50Hz (PAL)"},
-        {RES_HDMI_720P_50, "[HDMI] 720p 50Hz (GamePad stutter)"},
-        {RES_HDMI_720P_60, "[HDMI] 720p 60Hz (Progressive)"},
-        {RES_HDMI_720P_3D, "[HDMI] 720p 3D (Frame Packing)"},
-        {RES_HDMI_1080I_50, "[HDMI] 1080i 50Hz (GamePad stutter)"},
-        {RES_HDMI_1080I_60, "[HDMI] 1080i 60Hz (Interlaced)"},
-        {RES_HDMI_1080P_50, "[HDMI] 1080p 50Hz (GamePad stutter)"},
-        {RES_HDMI_1080P_60, "[HDMI] 1080p 60Hz (Progressive)"},
-};
-
-// ============================================================================
-// MEMORY WRITE WITH POWERPC BARRIERS
-// ============================================================================
-static bool Write32Uncached(uint32_t addr, uint32_t val) {
-    uint32_t phys = OSEffectiveToPhysical(addr);
-    if (!phys || phys < 0x00800000) return false;
-
-    volatile uint32_t *uncachedPtr = (volatile uint32_t *) (0x30000000 | phys);
-    *uncachedPtr                   = val;
-
+    void *aligned = reinterpret_cast<void *>(addr & ~0x1F);
+    DCFlushRange(aligned, 0x20);
     asm volatile("sync; isync;");
-    DCFlushRange((void *) addr, 4);
-    ICInvalidateRange((void *) addr, 4);
+    ICInvalidateRange(aligned, 0x20);
     asm volatile("sync; isync;");
     return true;
 }
 
-static bool ApplyPatchesInRAM(bool enable) {
-    uint32_t successCount = 0;
-    for (size_t i = 0; i < TOTAL_PATCHES; i++) {
-        uint32_t valToApply = enable ? g_MasterPatches[i].patchVal : g_MasterPatches[i].standardVal;
-        if (Write32Uncached(g_MasterPatches[i].addr, valToApply)) {
-            successCount++;
+// ============================================================================
+// DYNAMIC UNIVERSAL AVM SCANNER (FULL RGB)
+// ============================================================================
+struct SignaturePattern {
+    uint32_t searchStart;
+    uint32_t searchSize;
+    uint32_t patchedValue;  // 0x38E00001 (li r7, 1) -> Full RGB
+    uint32_t originalValue; // 0x38E00030 (li r7, 48) -> Limited RGB
+};
+
+static const SignaturePattern g_Patterns[] = {
+        {0x00FA0000, 0x30000, 0x38E00001, 0x38E00030},
+        {0x00FD0000, 0x30000, 0x38E00001, 0x38E00030}};
+static constexpr size_t g_NumPatterns              = sizeof(g_Patterns) / sizeof(g_Patterns[0]);
+static uint32_t s_ResolvedAddresses[g_NumPatterns] = {0};
+
+static uint32_t ScanMemoryForPattern(const SignaturePattern &sig, bool targetPatched) {
+    uint32_t targetVal = targetPatched ? sig.patchedValue : sig.originalValue;
+    for (uint32_t addr = sig.searchStart; addr < (sig.searchStart + sig.searchSize); addr += 4) {
+        if (!IsValidAddress(addr)) {
+            continue;
+        }
+        if (ReadCode32Safe(addr) == targetVal) {
+            return addr;
         }
     }
-    return (successCount == TOTAL_PATCHES);
+    return 0;
+}
+
+static void ApplyDynamicAvmPatches(bool enable) {
+    for (size_t i = 0; i < g_NumPatterns; ++i) {
+        const auto &sig = g_Patterns[i];
+        uint32_t addr   = s_ResolvedAddresses[i];
+
+        if (addr == 0) {
+            addr = ScanMemoryForPattern(sig, false);
+            if (addr == 0) {
+                addr = ScanMemoryForPattern(sig, true);
+            }
+
+            if (addr != 0) {
+                s_ResolvedAddresses[i] = addr;
+            } else {
+                continue;
+            }
+        }
+
+        uint32_t currentVal = ReadCode32Safe(addr);
+        uint32_t valToApply = enable ? sig.patchedValue : sig.originalValue;
+
+        if (currentVal == valToApply) {
+            continue;
+        }
+
+        WriteCode32Safe(addr, valToApply);
+    }
 }
 
 // ============================================================================
-// DIRECT VIDEO DRIVER FORCE (TVE + AVM)
+// CONFIGURATION ENUMS & STRUCTURES
 // ============================================================================
-static void TriggerAVMNativeReInit(uint32_t scanMode, bool fullRGB) {
-    LOG("⚡ [VIDEO] Direct re-init to scanMode %u (Full RGB: %d)...", scanMode, fullRGB);
+enum ConfigOperatingMode : uint32_t {
+    MODE_STANDARD           = 0,
+    MODE_VIDEO_MODE_CHANGER = 1,
+};
 
-    // 1. Apply memory patches (0x2A for Full RGB, 0x10 for Limited RGB)
-    ApplyPatchesInRAM(fullRGB);
+enum RGBStartupOptions : uint32_t {
+    RGB_STARTUP_DISABLED = 0,
+    RGB_STARTUP_ENABLED  = 1,
+};
 
-    // 2. Direct call to low-level TVE driver to force AVI InfoFrame refresh
-    OSDynLoad_Module handleTVE = 0;
-    if (OSDynLoad_Acquire("tve.rpl", &handleTVE) == 0) {
-        TVESetTVScanMode_t pTVESetTVScanMode = nullptr;
-        if (OSDynLoad_FindExport(handleTVE, OS_DYNLOAD_EXPORT_FUNC, "TVESetTVScanMode", (void **) &pTVESetTVScanMode) == 0 && pTVESetTVScanMode) {
-            pTVESetTVScanMode(scanMode);
-        }
-        OSDynLoad_Release(handleTVE);
+enum AutobootRegInitOptions : uint32_t {
+    AUTOBOOT_REGINIT_DISABLED = 0,
+    AUTOBOOT_REGINIT_ENABLED  = 1,
+};
+
+enum StandardResList : uint32_t {
+    STD_RES_480P  = 0,
+    STD_RES_720P  = 1,
+    STD_RES_1080I = 2,
+    STD_RES_1080P = 3,
+};
+
+struct ResolutionEntry {
+    const char *name;
+    AVMTvResolution value;
+};
+
+static constexpr ResolutionEntry g_AdvResolutions[] = {
+        {"480i (60Hz)", AVM_TV_RESOLUTION_480I},
+        {"480i PAL60 (60Hz)", AVM_TV_RESOLUTION_480I_PAL60},
+        {"480p (60Hz)", AVM_TV_RESOLUTION_480P},
+        {"576i (50Hz)", AVM_TV_RESOLUTION_576I},
+        {"576p (50Hz)", AVM_TV_RESOLUTION_576P},
+        {"720p 3D (60Hz)", AVM_TV_RESOLUTION_720P_3D},
+        {"720p (50Hz - glitchy GamePad)", AVM_TV_RESOLUTION_720P_50HZ},
+        {"720p (60Hz)", AVM_TV_RESOLUTION_720P},
+        {"1080i (50Hz - glitchy GamePad)", AVM_TV_RESOLUTION_1080I_50HZ},
+        {"1080i (60Hz)", AVM_TV_RESOLUTION_1080I},
+        {"1080p (50Hz - glitchy GamePad)", AVM_TV_RESOLUTION_1080P_50HZ},
+        {"1080p (60Hz)", AVM_TV_RESOLUTION_1080P}};
+static constexpr size_t g_NumAdvResolutions = sizeof(g_AdvResolutions) / sizeof(g_AdvResolutions[0]);
+
+static constexpr TVEPort g_PortHardwareMap[] = {
+        (TVEPort) 2, // Composite
+        (TVEPort) 3, // SCART
+        (TVEPort) 1, // Component
+        (TVEPort) 0  // HDMI
+};
+
+// ============================================================================
+// STATE VARIABLES
+// ============================================================================
+static uint32_t s_SelectedStdRes          = STD_RES_1080P;
+static uint32_t s_SelectedRGB             = RGB_STARTUP_ENABLED;
+static uint32_t s_SelectedConfigMode      = MODE_STANDARD;
+static uint32_t s_SelectedAutobootRegInit = AUTOBOOT_REGINIT_ENABLED;
+
+static uint32_t s_SelectedAdvRegion = 1;  // 0 = PAL, 1 = NTSC
+static uint32_t s_SelectedAdvPort   = 3;  // 3 = HDMI default
+static uint32_t s_SelectedAdvResIdx = 11; // 11 = 1080p (60Hz) default
+static uint32_t s_SelectedAdvAspect = 1;  // 0 = 4:3, 1 = 16:9
+static uint32_t s_SelectedTileMode  = 1;  // 1 = Fix illegible TV screen
+
+static uint32_t s_SnapshotStdRes          = STD_RES_1080P;
+static uint32_t s_SnapshotRGB             = RGB_STARTUP_ENABLED;
+static uint32_t s_SnapshotConfigMode      = MODE_STANDARD;
+static uint32_t s_SnapshotAutobootRegInit = AUTOBOOT_REGINIT_ENABLED;
+static uint32_t s_SnapshotAdvRegion       = 1;
+static uint32_t s_SnapshotAdvPort         = 3;
+static uint32_t s_SnapshotAdvResIdx       = 11;
+static uint32_t s_SnapshotAdvAspect       = 1;
+static uint32_t s_SnapshotTileMode        = 1;
+
+static constexpr WUPSConfigItemMultipleValues::ValuePair s_StdResolutionsList[] = {
+        {STD_RES_480P, "480p"},
+        {STD_RES_720P, "720p"},
+        {STD_RES_1080I, "1080i"},
+        {STD_RES_1080P, "1080p"},
+};
+
+static constexpr WUPSConfigItemMultipleValues::ValuePair s_RGBStartupList[] = {
+        {RGB_STARTUP_DISABLED, "Disabled (Limited 16-235)"},
+        {RGB_STARTUP_ENABLED, "Enabled (Full RGB 0-255)"},
+};
+
+static constexpr WUPSConfigItemMultipleValues::ValuePair s_ConfigModeList[] = {
+        {MODE_STANDARD, "Standard"},
+        {MODE_VIDEO_MODE_CHANGER, "Video Mode Changer"},
+};
+
+static constexpr WUPSConfigItemMultipleValues::ValuePair s_AutobootRegInitList[] = {
+        {AUTOBOOT_REGINIT_DISABLED, "Disabled"},
+        {AUTOBOOT_REGINIT_ENABLED, "Enabled"},
+};
+
+static constexpr WUPSConfigItemMultipleValues::ValuePair s_AdvRegionList[] = {
+        {0, "PAL"},
+        {1, "NTSC"},
+};
+
+static constexpr WUPSConfigItemMultipleValues::ValuePair s_AdvPortList[] = {
+        {0, "Composite"},
+        {1, "SCART"},
+        {2, "Component"},
+        {3, "HDMI"},
+};
+
+static constexpr WUPSConfigItemMultipleValues::ValuePair s_AdvResValuePairs[] = {
+        {0, "480i (60Hz)"},
+        {1, "480i PAL60 (60Hz)"},
+        {2, "480p (60Hz)"},
+        {3, "576i (50Hz)"},
+        {4, "576p (50Hz)"},
+        {5, "720p 3D (60Hz)"},
+        {6, "720p (50Hz - glitchy GamePad)"},
+        {7, "720p (60Hz)"},
+        {8, "1080i (50Hz - glitchy GamePad)"},
+        {9, "1080i (60Hz)"},
+        {10, "1080p (50Hz - glitchy GamePad)"},
+        {11, "1080p (60Hz)"},
+};
+
+static constexpr WUPSConfigItemMultipleValues::ValuePair s_AdvAspectList[] = {
+        {0, "4:3"},
+        {1, "16:9"},
+};
+
+static constexpr WUPSConfigItemMultipleValues::ValuePair s_AdvTileList[] = {
+        {0, "Disabled"},
+        {1, "Enabled (Fix Illegible Screen)"},
+};
+
+// ============================================================================
+// WUPS PERSISTENT STORAGE MANAGEMENT
+// ============================================================================
+static void LoadConfig() {
+    int32_t val = 0;
+    if (WUPSStorageAPI_GetInt(WUPS_STORAGE_ROOT_ITEM, "autoboot_reg_init", &val) == WUPS_STORAGE_ERROR_SUCCESS) {
+        s_SelectedAutobootRegInit = static_cast<uint32_t>(val);
+    } else {
+        s_SelectedAutobootRegInit = AUTOBOOT_REGINIT_ENABLED;
     }
 
-    // 3. Notify AVM to synchronize global system video state
+    if (WUPSStorageAPI_GetInt(WUPS_STORAGE_ROOT_ITEM, "std_res", &val) == WUPS_STORAGE_ERROR_SUCCESS) {
+        s_SelectedStdRes = static_cast<uint32_t>(val);
+    } else {
+        s_SelectedStdRes = STD_RES_1080P;
+    }
+
+    if (WUPSStorageAPI_GetInt(WUPS_STORAGE_ROOT_ITEM, "rgb_mode", &val) == WUPS_STORAGE_ERROR_SUCCESS) {
+        s_SelectedRGB = static_cast<uint32_t>(val);
+    } else {
+        s_SelectedRGB = RGB_STARTUP_ENABLED;
+    }
+
+    if (WUPSStorageAPI_GetInt(WUPS_STORAGE_ROOT_ITEM, "config_mode", &val) == WUPS_STORAGE_ERROR_SUCCESS) {
+        s_SelectedConfigMode = static_cast<uint32_t>(val);
+    } else {
+        s_SelectedConfigMode = MODE_STANDARD;
+    }
+
+    if (WUPSStorageAPI_GetInt(WUPS_STORAGE_ROOT_ITEM, "vmc_region", &val) == WUPS_STORAGE_ERROR_SUCCESS) {
+        s_SelectedAdvRegion = static_cast<uint32_t>(val);
+    } else {
+        s_SelectedAdvRegion = 1;
+    }
+
+    if (WUPSStorageAPI_GetInt(WUPS_STORAGE_ROOT_ITEM, "vmc_port", &val) == WUPS_STORAGE_ERROR_SUCCESS) {
+        s_SelectedAdvPort = static_cast<uint32_t>(val);
+    } else {
+        s_SelectedAdvPort = 3;
+    }
+
+    if (WUPSStorageAPI_GetInt(WUPS_STORAGE_ROOT_ITEM, "vmc_res", &val) == WUPS_STORAGE_ERROR_SUCCESS) {
+        s_SelectedAdvResIdx = static_cast<uint32_t>(val);
+    } else {
+        s_SelectedAdvResIdx = 11;
+    }
+
+    if (WUPSStorageAPI_GetInt(WUPS_STORAGE_ROOT_ITEM, "vmc_aspect", &val) == WUPS_STORAGE_ERROR_SUCCESS) {
+        s_SelectedAdvAspect = static_cast<uint32_t>(val);
+    } else {
+        s_SelectedAdvAspect = 1;
+    }
+
+    if (WUPSStorageAPI_GetInt(WUPS_STORAGE_ROOT_ITEM, "vmc_tile", &val) == WUPS_STORAGE_ERROR_SUCCESS) {
+        s_SelectedTileMode = static_cast<uint32_t>(val);
+    } else {
+        s_SelectedTileMode = 1;
+    }
+}
+
+static void SaveConfig() {
+    WUPSStorageAPI_StoreInt(WUPS_STORAGE_ROOT_ITEM, "autoboot_reg_init", static_cast<int32_t>(s_SelectedAutobootRegInit));
+    WUPSStorageAPI_StoreInt(WUPS_STORAGE_ROOT_ITEM, "std_res", static_cast<int32_t>(s_SelectedStdRes));
+    WUPSStorageAPI_StoreInt(WUPS_STORAGE_ROOT_ITEM, "rgb_mode", static_cast<int32_t>(s_SelectedRGB));
+    WUPSStorageAPI_StoreInt(WUPS_STORAGE_ROOT_ITEM, "config_mode", static_cast<int32_t>(s_SelectedConfigMode));
+    WUPSStorageAPI_StoreInt(WUPS_STORAGE_ROOT_ITEM, "vmc_region", static_cast<int32_t>(s_SelectedAdvRegion));
+    WUPSStorageAPI_StoreInt(WUPS_STORAGE_ROOT_ITEM, "vmc_port", static_cast<int32_t>(s_SelectedAdvPort));
+    WUPSStorageAPI_StoreInt(WUPS_STORAGE_ROOT_ITEM, "vmc_res", static_cast<int32_t>(s_SelectedAdvResIdx));
+    WUPSStorageAPI_StoreInt(WUPS_STORAGE_ROOT_ITEM, "vmc_aspect", static_cast<int32_t>(s_SelectedAdvAspect));
+    WUPSStorageAPI_StoreInt(WUPS_STORAGE_ROOT_ITEM, "vmc_tile", static_cast<int32_t>(s_SelectedTileMode));
+    WUPSStorageAPI_SaveStorage(WUPS_STORAGE_ROOT_ITEM);
+}
+
+static uint32_t CalculateTargetScanMode() {
+    switch (s_SelectedStdRes) {
+        case STD_RES_480P:
+            return 3;
+        case STD_RES_720P:
+            return 4;
+        case STD_RES_1080I:
+            return 6;
+        case STD_RES_1080P:
+        default:
+            return 7;
+    }
+}
+
+// ============================================================================
+// NATIVE AVM VIDEO SWITCHING
+// ============================================================================
+static void ApplyAdvancedVideoMode() {
     OSDynLoad_Module handleAVM = 0;
-    if (OSDynLoad_Acquire("avm.rpl", &handleAVM) == 0) {
+    if (OSDynLoad_Acquire("avm.rpl", &handleAVM) == 0 && handleAVM != 0) {
+        AVMSetTVTileMode_t pTileMode      = nullptr;
+        AVMSetTVVideoRegion_t pVideoReg   = nullptr;
+        AVMSetTVOutPort_t pOutPort        = nullptr;
+        AVMSetTVScanResolution_t pScanRes = nullptr;
+        AVMSetTVAspectRatio_t pAspect     = nullptr;
+
+        OSDynLoad_FindExport(handleAVM, OS_DYNLOAD_EXPORT_FUNC, "AVMSetTVTileMode", reinterpret_cast<void **>(&pTileMode));
+        OSDynLoad_FindExport(handleAVM, OS_DYNLOAD_EXPORT_FUNC, "AVMSetTVVideoRegion", reinterpret_cast<void **>(&pVideoReg));
+        OSDynLoad_FindExport(handleAVM, OS_DYNLOAD_EXPORT_FUNC, "AVMSetTVOutPort", reinterpret_cast<void **>(&pOutPort));
+        OSDynLoad_FindExport(handleAVM, OS_DYNLOAD_EXPORT_FUNC, "AVMSetTVScanResolution", reinterpret_cast<void **>(&pScanRes));
+        OSDynLoad_FindExport(handleAVM, OS_DYNLOAD_EXPORT_FUNC, "AVMSetTVAspectRatio", reinterpret_cast<void **>(&pAspect));
+
+        AVMTvResolution targetRes  = g_AdvResolutions[s_SelectedAdvResIdx].value;
+        TVEPort targetPort         = g_PortHardwareMap[s_SelectedAdvPort];
+        AVMTvVideoRegion targetReg = (s_SelectedAdvRegion == 1) ? AVM_TV_VIDEO_REGION_NTSC : AVM_TV_VIDEO_REGION_PAL;
+
+        if (pVideoReg) {
+            pVideoReg(targetReg, targetPort, targetRes);
+        } else if (pOutPort) {
+            pOutPort(targetPort, targetRes);
+        } else if (pScanRes) {
+            pScanRes(targetRes);
+        }
+
+        if (pAspect) {
+            pAspect(static_cast<AVMTvAspectRatio>(s_SelectedAdvAspect));
+        }
+
+        if (pTileMode && s_SelectedTileMode) {
+            pTileMode(static_cast<uint8_t>(s_SelectedTileMode));
+        }
+
+        OSDynLoad_Release(handleAVM);
+    }
+}
+
+static void ApplyVideoSettingsDirect() {
+    ApplyDynamicAvmPatches(s_SelectedRGB == RGB_STARTUP_ENABLED);
+
+    if (s_SelectedConfigMode == MODE_STANDARD) {
+        uint32_t targetMode        = CalculateTargetScanMode();
+        OSDynLoad_Module handleAVM = 0;
+        if (OSDynLoad_Acquire("avm.rpl", &handleAVM) == 0 && handleAVM != 0) {
+            AVMSetTVScanMode_t pAVMSetTVScanMode = nullptr;
+            if (OSDynLoad_FindExport(handleAVM, OS_DYNLOAD_EXPORT_FUNC, "AVMSetTVScanMode", reinterpret_cast<void **>(&pAVMSetTVScanMode)) == 0 && pAVMSetTVScanMode) {
+                pAVMSetTVScanMode(targetMode);
+            }
+            OSDynLoad_Release(handleAVM);
+        }
+    } else {
+        ApplyAdvancedVideoMode();
+    }
+}
+
+// ============================================================================
+// INITIAL AUTOBOOT THREAD (STARTUP ONLY)
+// ============================================================================
+static OSThread s_AutoBootThread;
+static uint8_t s_AutoBootThreadStack[0x4000] __attribute__((aligned(32)));
+static volatile bool s_AutobootDone = false;
+static uint32_t s_VPADFrameCounter  = 0;
+
+static int AutoBootThreadMain(int argc, const char **argv) {
+    ApplyDynamicAvmPatches(s_SelectedRGB == RGB_STARTUP_ENABLED);
+
+    uint32_t targetMode = CalculateTargetScanMode();
+    uint32_t tempMode   = (targetMode == 7) ? 4 : 7;
+
+    OSDynLoad_Module handleAVM = 0;
+    if (OSDynLoad_Acquire("avm.rpl", &handleAVM) == 0 && handleAVM != 0) {
         AVMSetTVScanMode_t pAVMSetTVScanMode = nullptr;
-        if (OSDynLoad_FindExport(handleAVM, OS_DYNLOAD_EXPORT_FUNC, "AVMSetTVScanMode", (void **) &pAVMSetTVScanMode) == 0 && pAVMSetTVScanMode) {
-            pAVMSetTVScanMode(scanMode);
+        if (OSDynLoad_FindExport(handleAVM, OS_DYNLOAD_EXPORT_FUNC, "AVMSetTVScanMode", reinterpret_cast<void **>(&pAVMSetTVScanMode)) == 0 && pAVMSetTVScanMode) {
+            // HDMI handshake: 720p -> 1080p switch forces TV/scaler into RGB mode
+            pAVMSetTVScanMode(tempMode);
+            OSSleepTicks(OSMillisecondsToTicks(1500));
+            pAVMSetTVScanMode(targetMode);
         }
         OSDynLoad_Release(handleAVM);
     }
 
-    // 4. Final in-RAM patch lock
-    ApplyPatchesInRAM(fullRGB);
+    return 0;
 }
 
 // ============================================================================
-// CONFIG MENU CALLBACKS
+// VPADRead HOOK
 // ============================================================================
-void rgbModeChanged(ConfigItemMultipleValues *item, uint32_t newValue) {
-    s_SelectedRGBMode = newValue;
+DECL_FUNCTION(int32_t, VPADRead, VPADChan chan, VPADStatus *buffers, uint32_t count, VPADReadError *error) {
+    int32_t result = real_VPADRead(chan, buffers, count, error);
+
+    if (s_SelectedAutobootRegInit == AUTOBOOT_REGINIT_ENABLED && !s_AutobootDone && chan == VPAD_CHAN_0) {
+        if (IsWiiUMenu()) {
+            s_VPADFrameCounter++;
+
+            if (s_VPADFrameCounter >= 240) { // ~4 seconds after WaraWara Plaza loads
+                s_AutobootDone = true;
+
+                bool threadOk = OSCreateThread(&s_AutoBootThread,
+                                               AutoBootThreadMain,
+                                               0, nullptr,
+                                               s_AutoBootThreadStack + sizeof(s_AutoBootThreadStack),
+                                               sizeof(s_AutoBootThreadStack),
+                                               20,
+                                               OS_THREAD_ATTRIB_AFFINITY_CPU1);
+
+                if (threadOk) {
+                    OSResumeThread(&s_AutoBootThread);
+                }
+            }
+        }
+    }
+
+    return result;
 }
 
-void resModeChanged(ConfigItemMultipleValues *item, uint32_t newValue) {
-    s_SelectedResIdx = newValue;
+WUPS_MUST_REPLACE(VPADRead, WUPS_LOADER_LIBRARY_VPAD, VPADRead);
+
+// ============================================================================
+// AROMA CONFIGURATION MENU CALLBACKS
+// ============================================================================
+void stdResChanged(ConfigItemMultipleValues *item, uint32_t val) {
+    s_SelectedStdRes = val;
+    // Automatically switch to MODE_STANDARD when standard resolution is modified
+    s_SelectedConfigMode = MODE_STANDARD;
+}
+
+void rgbStartupChanged(ConfigItemMultipleValues *item, uint32_t val) {
+    s_SelectedRGB = val;
+}
+
+void configModeChanged(ConfigItemMultipleValues *item, uint32_t val) {
+    s_SelectedConfigMode = val;
+}
+
+void autobootRegInitChanged(ConfigItemMultipleValues *item, uint32_t val) {
+    s_SelectedAutobootRegInit = val;
+}
+
+void advRegionChanged(ConfigItemMultipleValues *item, uint32_t val) {
+    s_SelectedAdvRegion  = val;
+    s_SelectedConfigMode = MODE_VIDEO_MODE_CHANGER;
+}
+
+void advPortChanged(ConfigItemMultipleValues *item, uint32_t val) {
+    s_SelectedAdvPort    = val;
+    s_SelectedConfigMode = MODE_VIDEO_MODE_CHANGER;
+}
+
+void advResChanged(ConfigItemMultipleValues *item, uint32_t val) {
+    s_SelectedAdvResIdx  = val;
+    s_SelectedConfigMode = MODE_VIDEO_MODE_CHANGER;
+}
+
+void advAspectChanged(ConfigItemMultipleValues *item, uint32_t val) {
+    s_SelectedAdvAspect  = val;
+    s_SelectedConfigMode = MODE_VIDEO_MODE_CHANGER;
+}
+
+void advTileChanged(ConfigItemMultipleValues *item, uint32_t val) {
+    s_SelectedTileMode   = val;
+    s_SelectedConfigMode = MODE_VIDEO_MODE_CHANGER;
 }
 
 WUPSConfigAPICallbackStatus ConfigMenuOpenedCallback(WUPSConfigCategoryHandle rootHandle) {
+    s_SnapshotStdRes          = s_SelectedStdRes;
+    s_SnapshotRGB             = s_SelectedRGB;
+    s_SnapshotConfigMode      = s_SelectedConfigMode;
+    s_SnapshotAutobootRegInit = s_SelectedAutobootRegInit;
+    s_SnapshotAdvRegion       = s_SelectedAdvRegion;
+    s_SnapshotAdvPort         = s_SelectedAdvPort;
+    s_SnapshotAdvResIdx       = s_SelectedAdvResIdx;
+    s_SnapshotAdvAspect       = s_SelectedAdvAspect;
+    s_SnapshotTileMode        = s_SelectedTileMode;
+
     WUPSConfigCategory root = WUPSConfigCategory(rootHandle);
     try {
-        WUPSStorageAPI::GetOrStoreDefault(RES_STORAGE_KEY, s_SelectedResIdx, (uint32_t) DEFAULT_RES_IDX);
-        WUPSStorageAPI::GetOrStoreDefault(RGB_MODE_STORAGE_KEY, s_SelectedRGBMode, (uint32_t) DEFAULT_RGB_MODE);
-
-        // 1. Full RGB Mode (Disabled / Session only / Apply on Boot)
         root.add(WUPSConfigItemMultipleValues::CreateFromValue(
-                RGB_MODE_STORAGE_KEY, "Full RGB Mode",
-                (uint32_t) DEFAULT_RGB_MODE, s_SelectedRGBMode,
-                s_PossibleRGBModes,
-                rgbModeChanged));
+                "std_res", "Standard Resolution",
+                (uint32_t) STD_RES_1080P, s_SelectedStdRes,
+                s_StdResolutionsList, stdResChanged));
 
-        // 2. Video Mode / Resolution
         root.add(WUPSConfigItemMultipleValues::CreateFromValue(
-                RES_STORAGE_KEY, "Video Mode / Resolution",
-                (uint32_t) DEFAULT_RES_IDX, s_SelectedResIdx,
-                s_PossibleResolutions,
-                resModeChanged));
+                "rgb_mode", "Color Range Mode",
+                (uint32_t) RGB_STARTUP_ENABLED, s_SelectedRGB,
+                s_RGBStartupList, rgbStartupChanged));
+
+        root.add(WUPSConfigItemMultipleValues::CreateFromValue(
+                "config_mode", "Mode Selector",
+                (uint32_t) MODE_STANDARD, s_SelectedConfigMode,
+                s_ConfigModeList, configModeChanged));
+
+        root.add(WUPSConfigItemMultipleValues::CreateFromValue(
+                "autoboot_reg_init", "Autoboot",
+                (uint32_t) AUTOBOOT_REGINIT_ENABLED, s_SelectedAutobootRegInit,
+                s_AutobootRegInitList, autobootRegInitChanged));
+
+        WUPSConfigCategory vmcCategory = WUPSConfigCategory::Create("Video Mode Changer");
+
+        vmcCategory.add(WUPSConfigItemMultipleValues::CreateFromValue(
+                "vmc_region", "Video Region",
+                (uint32_t) 1, s_SelectedAdvRegion,
+                s_AdvRegionList, advRegionChanged));
+
+        vmcCategory.add(WUPSConfigItemMultipleValues::CreateFromValue(
+                "vmc_port", "Output Port",
+                (uint32_t) 3, s_SelectedAdvPort,
+                s_AdvPortList, advPortChanged));
+
+        vmcCategory.add(WUPSConfigItemMultipleValues::CreateFromValue(
+                "vmc_res", "Resolution & Refresh Rate",
+                (uint32_t) 11, s_SelectedAdvResIdx,
+                s_AdvResValuePairs, advResChanged));
+
+        vmcCategory.add(WUPSConfigItemMultipleValues::CreateFromValue(
+                "vmc_aspect", "Aspect Ratio",
+                (uint32_t) 1, s_SelectedAdvAspect,
+                s_AdvAspectList, advAspectChanged));
+
+        vmcCategory.add(WUPSConfigItemMultipleValues::CreateFromValue(
+                "vmc_tile", "Tile Mode Fix",
+                (uint32_t) 1, s_SelectedTileMode,
+                s_AdvTileList, advTileChanged));
+
+        root.add(std::move(vmcCategory));
+
     } catch (std::exception &e) {
         return WUPSCONFIG_API_CALLBACK_RESULT_ERROR;
     }
@@ -206,22 +597,27 @@ WUPSConfigAPICallbackStatus ConfigMenuOpenedCallback(WUPSConfigCategoryHandle ro
 }
 
 void ConfigMenuClosedCallback() {
-    bool resChanged = (s_SelectedResIdx != s_AppliedResIdx);
-    bool rgbChanged = (s_SelectedRGBMode != s_AppliedRGBMode);
+    bool videoChanged = (s_SelectedStdRes != s_SnapshotStdRes) ||
+                        (s_SelectedRGB != s_SnapshotRGB) ||
+                        (s_SelectedConfigMode != s_SnapshotConfigMode) ||
+                        (s_SelectedAdvRegion != s_SnapshotAdvRegion) ||
+                        (s_SelectedAdvPort != s_SnapshotAdvPort) ||
+                        (s_SelectedAdvResIdx != s_SnapshotAdvResIdx) ||
+                        (s_SelectedAdvAspect != s_SnapshotAdvAspect) ||
+                        (s_SelectedTileMode != s_SnapshotTileMode);
 
-    WUPSStorageAPI::Store(RES_STORAGE_KEY, s_SelectedResIdx);
-    WUPSStorageAPI::Store(RGB_MODE_STORAGE_KEY, s_SelectedRGBMode);
-    WUPSStorageAPI::SaveStorage();
+    bool configChanged = (s_SelectedAutobootRegInit != s_SnapshotAutobootRegInit) || videoChanged;
 
-    if (resChanged || rgbChanged) {
-        bool enableRGB      = (s_SelectedRGBMode != RGB_DISABLED);
-        uint32_t targetMode = s_ScanModes[s_SelectedResIdx];
+    if (!configChanged) {
+        return;
+    }
 
-        LOG("⚡ [CONFIG] Change applied (Mode: %u, RGB: %d)...", targetMode, enableRGB);
-        TriggerAVMNativeReInit(targetMode, enableRGB);
+    // Persist configuration to WUPS storage
+    SaveConfig();
 
-        s_AppliedResIdx  = s_SelectedResIdx;
-        s_AppliedRGBMode = s_SelectedRGBMode;
+    // Trigger hardware video re-init only if display parameters changed
+    if (videoChanged) {
+        ApplyVideoSettingsDirect();
     }
 }
 
@@ -229,40 +625,14 @@ void ConfigMenuClosedCallback() {
 // PLUGIN LIFECYCLE
 // ============================================================================
 INITIALIZE_PLUGIN() {
-    WHBLogUdpInit();
-
-    WUPSStorageAPI::GetOrStoreDefault(RES_STORAGE_KEY, s_SelectedResIdx, (uint32_t) DEFAULT_RES_IDX);
-    WUPSStorageAPI::GetOrStoreDefault(RGB_MODE_STORAGE_KEY, s_SelectedRGBMode, (uint32_t) DEFAULT_RGB_MODE);
-    WUPSStorageAPI::SaveStorage();
-
-    s_AppliedResIdx  = s_SelectedResIdx;
-    s_AppliedRGBMode = s_SelectedRGBMode;
+    LoadConfig();
 
     WUPSConfigAPIOptionsV1 configOptions = {};
     configOptions.name                   = "Full RGB TV";
     WUPSConfigAPI_Init(configOptions, ConfigMenuOpenedCallback, ConfigMenuClosedCallback);
 }
 
-DEINITIALIZE_PLUGIN() {
-    WUPSStorageAPI::SaveStorage();
-    WHBLogUdpDeinit();
-}
-
-ON_APPLICATION_START() {
-    // If 'Apply on Boot' is selected, initialize video mode on coldboot
-    if (!s_ColdbootDone) {
-        s_ColdbootDone = true;
-
-        if (s_SelectedRGBMode == RGB_APPLY_ON_BOOT) {
-            LOG("⚡ [COLDBOOT] Initializing Video Mode %u with Full RGB...", s_SelectedResIdx);
-            uint32_t targetMode = s_ScanModes[s_SelectedResIdx];
-            TriggerAVMNativeReInit(targetMode, true);
-
-            s_AppliedResIdx  = s_SelectedResIdx;
-            s_AppliedRGBMode = RGB_APPLY_ON_BOOT;
-        }
-    }
-}
-
+DEINITIALIZE_PLUGIN() {}
+ON_APPLICATION_START() {}
 ON_APPLICATION_ENDS() {}
 ON_APPLICATION_REQUESTS_EXIT() {}
