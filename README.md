@@ -12,7 +12,7 @@ A native **WUPS plugin** for Nintendo Wii U (Aroma) that forces **Full Range RGB
 ## 🌟 Overview & Why This Plugin?
 
 * **Native Full RGB (0–255):** By default, the Wii U outputs HDMI video strictly in **Limited Range RGB (16–235)**. On modern PC monitors, OLED screens, HDMI capture cards, and TVs expecting Full RGB, this causes washed-out blacks, grey tinting, and inaccurate color tracking. This plugin injects custom display buffers directly into memory to force true **Full RGB (0–255)** output.
-* **On-the-Fly Video Switching:** Switch video output resolutions and refresh rates instantly from the Aroma configuration menu without exiting to the Wii U System Settings.
+* **Quick Video Switching: Change video output resolutions and refresh rates directly through the Aroma configuration menu without leaving your game or entering the Wii U System Settings.
 * **Extended Display Modes:** Unlocks native access to extended modes, including **720p 3D Frame Packing**, 50Hz/60Hz interlaced and progressive modes, as well as legacy analog modes (Composite & SCART PAL60).
 
 ---
@@ -20,7 +20,7 @@ A native **WUPS plugin** for Nintendo Wii U (Aroma) that forces **Full Range RGB
 ## ✨ Features
 
 * 🎨 **Full RGB Color Range (0–255):** Enjoy deep blacks and accurate color reproduction.
-* ⚡ **Instant Switch:** Change resolutions on-the-fly directly inside games, homebrew, or the Wii U Menu.
+* ⚡ Fast Menu Switching: Seamlessly adjust resolutions and color range through the Aroma overlay while in-game or on the Wii U Menu.
 * 💾 **Apply on Boot (Persistence):** Save your Full RGB configuration to persist across coldboots via the WUPS Storage API.
 * 📺 **Extended Video Modes Supported:**
   * **Composite / Analog:** 480i (NTSC 60Hz), 576i (PAL 50Hz), 480i PAL60 (60Hz)
